@@ -1,0 +1,120 @@
+{
+  "marketplace": {
+    "project_templates": {
+      "react-typescript": {
+        "name": "React TypeScript Project",
+        "description": "Modern React application with TypeScript, Vite, and testing setup",
+        "tags": ["react", "typescript", "vite", "frontend"],
+        "files": {
+          "package.json": "Basic React + TypeScript dependencies with Vite",
+          "tsconfig.json": "Strict TypeScript configuration",
+          "vite.config.ts": "Vite configuration with React plugin",
+          "src/App.tsx": "Main application component",
+          "src/main.tsx": "Application entry point"
+        }
+      },
+      "node-api": {
+        "name": "Node.js API Server",
+        "description": "Express.js API server with TypeScript, middleware, and testing",
+        "tags": ["nodejs", "express", "api", "backend"],
+        "files": {
+          "package.json": "Express + TypeScript dependencies",
+          "src/app.ts": "Express application setup",
+          "src/routes/index.ts": "API route definitions",
+          "src/middleware/index.ts": "Common middleware"
+        }
+      },
+      "python-fastapi": {
+        "name": "Python FastAPI Project",
+        "description": "FastAPI application with async support, Pydantic models, and testing",
+        "tags": ["python", "fastapi", "api", "async"],
+        "files": {
+          "requirements.txt": "FastAPI and common dependencies",
+          "main.py": "FastAPI application entry point",
+          "models.py": "Pydantic data models",
+          "routers/": "API route modules"
+        }
+      },
+      "rust-cli": {
+        "name": "Rust CLI Application",
+        "description": "Command-line application with clap argument parsing and error handling",
+        "tags": ["rust", "cli", "clap"],
+        "files": {
+          "Cargo.toml": "Rust project configuration with clap dependency",
+          "src/main.rs": "CLI application entry point",
+          "src/cli.rs": "Command-line argument definitions"
+        }
+      }
+    },
+    "code_snippets": {
+      "react_hooks": {
+        "useLocalStorage": "React hook for localStorage with TypeScript",
+        "useDebounce": "Debounce hook for input handling",
+        "useFetch": "Data fetching hook with loading states",
+        "useAuth": "Authentication state management hook"
+      },
+      "express_middleware": {
+        "errorHandler": "Global error handling middleware",
+        "rateLimiter": "Rate limiting middleware",
+        "authValidator": "JWT authentication middleware",
+        "requestLogger": "Request logging middleware"
+      },
+      "python_utilities": {
+        "async_retry": "Async retry decorator with exponential backoff",
+        "config_loader": "Configuration loading from environment/files",
+        "database_pool": "Async database connection pool",
+        "api_client": "Reusable HTTP client with retries"
+      },
+      "rust_patterns": {
+        "error_types": "Custom error types with thiserror",
+        "config_struct": "Configuration struct with serde",
+        "async_trait": "Async trait pattern for dependency injection",
+        "cli_parser": "Command-line parsing with clap"
+      }
+    },
+    "development_configs": {
+      "typescript": {
+        "tsconfig.json": "Strict TypeScript configuration",
+        "eslint.config.js": "ESLint configuration with recommended rules",
+        "prettier.config.js": "Prettier formatting configuration"
+      },
+      "python": {
+        "pyproject.toml": "Modern Python project configuration",
+        "ruff.toml": "Ruff linting and formatting configuration",
+        "mypy.ini": "MyPy type checking configuration"
+      },
+      "rust": {
+        "Cargo.toml": "Rust project configuration with common settings",
+        "rustfmt.toml": "Rust formatting configuration",
+        "clippy.toml": "Clippy linting configuration"
+      },
+      "github_actions": {
+        "ci.yml": "Continuous integration workflow",
+        "release.yml": "Automated release workflow",
+        "security.yml": "Security scanning workflow"
+      }
+    },
+    "testing_frameworks": {
+      "javascript": ["jest", "vitest", "playwright", "cypress"],
+      "python": ["pytest", "unittest", "hypothesis", "behave"],
+      "rust": ["cargo test", "proptest", "criterion"],
+      "integration": ["docker-compose", "testcontainers", "wiremock"]
+    },
+    "deployment_configs": {
+      "docker": {
+        "Dockerfile": "Multi-stage Docker build configuration",
+        "docker-compose.yml": "Local development environment",
+        ".dockerignore": "Docker build context optimization"
+      },
+      "vercel": {
+        "vercel.json": "Vercel deployment configuration"
+      },
+      "railway": {
+        "railway.toml": "Railway deployment configuration"
+      },
+      "aws": {
+        "cloudformation.yml": "Basic AWS infrastructure template"
+      }
+    }
+  }
+}
