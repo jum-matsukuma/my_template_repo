@@ -18,13 +18,15 @@ npm run lint        # Run linting
 npm run typecheck   # TypeScript type checking
 ```
 
-### Python Projects
+### Python Projects (uv-based)
 ```bash
-pip install -r requirements.txt  # Install dependencies
-python -m pytest                 # Run tests
-python -m black .                # Format code
-python -m ruff check             # Lint code
-python -m mypy .                 # Type checking
+uv sync                          # Install dependencies
+uv sync --extra dev              # Install with dev dependencies
+uv run python -m pytest         # Run tests
+uv run python -m black .         # Format code
+uv run python -m ruff check      # Lint code
+uv run python -m mypy .          # Type checking
+uv run jupyter notebook          # Start Jupyter
 ```
 
 ## Code Style
