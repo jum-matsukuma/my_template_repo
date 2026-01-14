@@ -22,6 +22,7 @@ npm run typecheck   # TypeScript type checking
 ```bash
 uv sync                          # Install dependencies
 uv sync --extra dev              # Install with dev dependencies
+uv sync --extra kaggle           # Install with Kaggle dependencies
 uv run python -m pytest         # Run tests
 uv run python -m black .         # Format code
 uv run python -m ruff check      # Lint code
@@ -29,6 +30,22 @@ uv run python -m mypy .          # Type checking
 uv run jupyter notebook          # Start Jupyter
 uv run jupyter lab              # Start JupyterLab
 ```
+
+### Kaggle API Commands
+```bash
+# Setup: Place kaggle.json in ~/.kaggle/ (get from kaggle.com/account)
+uv run kaggle competitions list              # List competitions
+uv run kaggle competitions download -c NAME  # Download competition data
+uv run kaggle competitions submit -c NAME -f submission.csv -m "Message"
+
+uv run kaggle kernels list --competition NAME --sort-by voteCount  # Top notebooks
+uv run kaggle kernels pull user/notebook-name -p ./notebooks/      # Download notebook
+
+uv run kaggle datasets list --search "query"  # Search datasets
+uv run kaggle datasets download user/dataset  # Download dataset
+```
+
+See `SKILLS/kaggle/kaggle-api-setup.md` for detailed setup instructions.
 
 ## Code Style
 

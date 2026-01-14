@@ -4,6 +4,9 @@ This directory contains specialized skills for Kaggle competition development. T
 
 ## Available Skills
 
+### Setup and Tools
+- `kaggle-api-setup.md` - Kaggle API installation and authentication guide
+
 ### Core Competition Skills
 - `kaggle-workflow.md` - Efficient competition workflow patterns
 - `competition-strategy.md` - Strategic competition management
