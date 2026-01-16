@@ -6,6 +6,9 @@ This directory contains specialized skills for Kaggle competition development. T
 
 ### Setup and Tools
 - `kaggle-api-setup.md` - Kaggle API installation and authentication guide
+- `colab-workflow.md` - Google Colab + Claude Code development workflow
+- `claude-friendly-outputs.md` - Creating outputs Claude can review locally
+- `data-analysis-workflow.md` - Complete data analysis workflow with Claude + Colab
 
 ### Core Competition Skills
 - `kaggle-workflow.md` - Efficient competition workflow patterns
