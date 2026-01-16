@@ -1,11 +1,11 @@
-"""Tests for reporting utilities."""
+"""Tests for Kaggle reporting utilities."""
 
 import pytest
 import pandas as pd
 import tempfile
 from pathlib import Path
 
-from src.reporting import (
+from kaggle_utils.reporting import (
     ExperimentReporter,
     generate_full_report,
     create_data_summary,

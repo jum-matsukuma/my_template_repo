@@ -18,7 +18,7 @@ Complete workflow for data analysis in Kaggle competitions using Claude Code for
 │                        GitHub                             │
 │  - src/eda.py (analysis functions)                       │
 │  - src/data_loader.py (data loading)                     │
-│  - src/reporting.py (report generation)                  │
+│  - kaggle_utils/reporting.py (report generation)         │
 └────────────────┬─────────────────────────────────────────┘
                  │ git pull
                  ↓
@@ -271,7 +271,7 @@ def create_eda_report(
     This report is designed to be read by Claude Code locally.
     """
     from datetime import datetime
-    from src.reporting import create_data_summary
+    from kaggle_utils.reporting import create_data_summary
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)

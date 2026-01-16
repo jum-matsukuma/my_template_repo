@@ -512,7 +512,7 @@ results = run_experiment(
 )
 
 # Generate report
-from src.reporting import generate_full_report  # Your reporting module
+from kaggle_utils.reporting import generate_full_report  # Your reporting module
 
 report_path = generate_full_report(
     experiment_name='baseline_v1',
