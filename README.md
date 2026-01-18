@@ -47,17 +47,23 @@ This template includes a complete workflow for Kaggle competitions with Claude C
    uv sync --extra kaggle
    ```
 
-2. **Setup Kaggle API authentication:**
+2. **Download dataset to Google Drive (recommended):**
+   - Open `kaggle-template/setup_download_data.ipynb` in Google Colab
+   - Set your competition name and run cells
+   - Dataset downloads directly to Google Drive (no local disk space needed)
+
+   Alternatively, download locally (small datasets only):
    ```bash
    mkdir -p ~/.kaggle
    cp ~/Downloads/kaggle.json ~/.kaggle/
    chmod 600 ~/.kaggle/kaggle.json
+   uv run kaggle competitions download -c titanic
    ```
 
-3. **Create Google Drive structure:**
+3. **Google Drive structure (auto-created by setup notebook):**
    ```
    Google Drive/Kaggle/your-competition/
-   ├── data/          # Datasets
+   ├── data/          # Datasets (not in git)
    ├── outputs/       # Reports, plots, models from Colab
    └── submissions/   # Submission files
    ```

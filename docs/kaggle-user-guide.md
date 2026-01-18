@@ -36,13 +36,128 @@ Kaggleコンペ「Titanic - Machine Learning from Disaster」に取り組みま�
 3. 初期コミットとリモートへのプッシュ
 ```
 
-### 1-3. Kaggle API認証設定
+### 1-3. データセットのダウンロード
+
+データセットの取得方法は2つあります。大容量データセットの場合は**方法A（推奨）**を使用してください。
+
+#### 方法A: Google Driveへ直接ダウンロード（推奨）
+
+ローカルマシンのディスク容量を使わず、高速にダウンロードできます。
+
+**手順1: テンプレートノートブックを使用**
+
+`kaggle-template/setup_download_data.ipynb`をGoogle Colabで開きます。
+
+または、Google Colabで新しいノートブックを作成して以下のコードを実行します。
+
+**手順2: コンペ名を設定して実行**
+
+ノートブック内の`COMPETITION`変数を自分のコンペ名に変更し、セルを順番に実行します。
+
+```python
+# ===== セル1: Google Driveマウント =====
+from google.colab import drive
+drive.mount('/content/drive')
+
+# ===== セル2: ディレクトリ準備 =====
+import os
+
+# コンペ名を設定
+COMPETITION = "titanic"  # 自分のコンペ名に変更
+DRIVE_PATH = f"/content/drive/MyDrive/Kaggle/{COMPETITION}"
+
+# ディレクトリ構造作成
+os.makedirs(f"{DRIVE_PATH}/data", exist_ok=True)
+os.makedirs(f"{DRIVE_PATH}/outputs/reports", exist_ok=True)
+os.makedirs(f"{DRIVE_PATH}/outputs/plots", exist_ok=True)
+os.makedirs(f"{DRIVE_PATH}/outputs/models", exist_ok=True)
+os.makedirs(f"{DRIVE_PATH}/submissions", exist_ok=True)
+
+print(f"Created directory structure in: {DRIVE_PATH}")
+
+# ===== セル3: Kaggle API認証 =====
+# 方法3-1: kaggle.jsonをアップロードして設定（推奨）
+from google.colab import files
+import os
+import json
+
+# kaggle.jsonをアップロード
+print("Please upload your kaggle.json file:")
+uploaded = files.upload()
+
+# Kaggle認証情報を設定
+os.makedirs('/root/.kaggle', exist_ok=True)
+with open('/root/.kaggle/kaggle.json', 'w') as f:
+    f.write(list(uploaded.values())[0].decode('utf-8'))
+os.chmod('/root/.kaggle/kaggle.json', 0o600)
+
+print("Kaggle API configured successfully!")
+
+# 方法3-2: または環境変数で設定（毎回入力が必要）
+# import os
+# from getpass import getpass
+# os.environ['KAGGLE_USERNAME'] = input('Kaggle Username: ')
+# os.environ['KAGGLE_KEY'] = getpass('Kaggle API Key: ')
+
+# ===== セル4: Kaggle CLIインストール =====
+!pip install -q kaggle
+
+# ===== セル5: データセットをGoogle Driveにダウンロード =====
+import os
+os.chdir(f"{DRIVE_PATH}/data")
+
+# コンペデータをダウンロード
+!kaggle competitions download -c {COMPETITION}
+
+# ZIPファイルを解凍
+!unzip -q {COMPETITION}.zip
+!rm {COMPETITION}.zip
+
+print(f"\nDataset downloaded to: {DRIVE_PATH}/data")
+!ls -lh
+
+# ===== セル6: ダウンロード確認 =====
+import pandas as pd
+import os
+
+data_dir = f"{DRIVE_PATH}/data"
+files = os.listdir(data_dir)
+print(f"Downloaded files: {files}")
+
+# サンプルデータ表示
+for file in files:
+    if file.endswith('.csv'):
+        df = pd.read_csv(f"{data_dir}/{file}")
+        print(f"\n{file}: {df.shape}")
+        print(df.head())
+```
+
+**手順3: 実行結果**
+- データがGoogle Drive/Kaggle/titanic/data/に保存される
+- Google Drive Desktopを使用している場合、自動的にローカルに同期される
+- ローカルディスク容量が足りない場合は、Google Driveのストリーミング設定を使用
+
+**メリット:**
+- ✅ ローカルディスク容量を節約
+- ✅ Colabの高速ネットワークでダウンロード
+- ✅ 大容量データセット（数GB〜数十GB）でも問題なし
+- ✅ 一度ダウンロードすれば、複数のプロジェクトで再利用可能
+
+#### 方法B: ローカルでダウンロード（小規模データセット向け）
+
+小規模なデータセット（数百MB以下）の場合のみ推奨。
 
 ```bash
 # Kaggle API トークンを配置
 mkdir -p ~/.kaggle
 cp ~/Downloads/kaggle.json ~/.kaggle/
 chmod 600 ~/.kaggle/kaggle.json
+
+# データをダウンロード
+uv run kaggle competitions download -c titanic -p ./competitions/titanic
+cd competitions/titanic
+unzip titanic.zip
+rm titanic.zip
 ```
 
 **Claude Codeへの指示例:**
@@ -51,7 +166,7 @@ Kaggle APIが正しく設定されているか確認してください。
 コンペ「titanic」のデータをダウンロードして、competitions/titanic/に配置してください。
 ```
 
-### 1-4. Google Drive構造の準備
+### 1-4. Google Drive構造の準備（方法Aを使用した場合はスキップ）
 
 **手動作業:**
 ```
