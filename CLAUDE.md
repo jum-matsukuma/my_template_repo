@@ -90,11 +90,20 @@ project-root/
 ## Special Templates
 
 ### Kaggle Competition Development
-For Kaggle competitions, use the dedicated template:
+
+**Standard Setup (Local execution):**
 ```bash
 cp -r kaggle-template/ my-competition/
 cd my-competition/
 uv sync --extra kaggle
 ```
+
+**Google Colab Setup (Cloud execution with GPU):**
+For competitions requiring large datasets or GPU/TPU resources:
+- Develop code locally with Claude Code
+- Store data in Google Drive
+- Execute training on Google Colab
+- See `SKILLS/kaggle/colab-workflow.md` for complete setup guide
+- Use `kaggle-template/colab_template.ipynb` as starting point
 
 The template includes specialized notebooks, directory structure, and access to Kaggle-specific SKILLS at `../SKILLS/kaggle/`.
