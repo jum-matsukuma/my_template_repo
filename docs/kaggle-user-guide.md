@@ -76,28 +76,24 @@ os.makedirs(f"{DRIVE_PATH}/submissions", exist_ok=True)
 print(f"Created directory structure in: {DRIVE_PATH}")
 
 # ===== セル3: Kaggle API認証 =====
-# 方法3-1: kaggle.jsonをアップロードして設定（推奨）
-from google.colab import files
 import os
 import json
+from getpass import getpass
 
-# kaggle.jsonをアップロード
-print("Please upload your kaggle.json file:")
-uploaded = files.upload()
+# Kaggle認証情報を入力
+# (https://www.kaggle.com/settings -> API -> Create New Token で取得)
+print("Enter your Kaggle credentials:")
+kaggle_username = input("Kaggle Username: ")
+kaggle_key = getpass("Kaggle API Key: ")
 
-# Kaggle認証情報を設定
+# kaggle.jsonを作成
 os.makedirs('/root/.kaggle', exist_ok=True)
+kaggle_json = {"username": kaggle_username, "key": kaggle_key}
 with open('/root/.kaggle/kaggle.json', 'w') as f:
-    f.write(list(uploaded.values())[0].decode('utf-8'))
+    json.dump(kaggle_json, f)
 os.chmod('/root/.kaggle/kaggle.json', 0o600)
 
 print("Kaggle API configured successfully!")
-
-# 方法3-2: または環境変数で設定（毎回入力が必要）
-# import os
-# from getpass import getpass
-# os.environ['KAGGLE_USERNAME'] = input('Kaggle Username: ')
-# os.environ['KAGGLE_KEY'] = getpass('Kaggle API Key: ')
 
 # ===== セル4: Kaggle CLIインストール =====
 !pip install -q kaggle

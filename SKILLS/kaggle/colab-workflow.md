@@ -94,11 +94,18 @@ drive.mount('/content/drive')
 !pip install -q kaggle
 
 # Setup Kaggle credentials (one-time)
-from google.colab import files
-uploaded = files.upload()  # Upload kaggle.json
-!mkdir -p ~/.kaggle
-!mv kaggle.json ~/.kaggle/
-!chmod 600 ~/.kaggle/kaggle.json
+import os
+import json
+from getpass import getpass
+
+print("Enter your Kaggle credentials:")
+kaggle_username = input("Kaggle Username: ")
+kaggle_key = getpass("Kaggle API Key: ")
+
+os.makedirs('/root/.kaggle', exist_ok=True)
+with open('/root/.kaggle/kaggle.json', 'w') as f:
+    json.dump({"username": kaggle_username, "key": kaggle_key}, f)
+os.chmod('/root/.kaggle/kaggle.json', 0o600)
 
 # Download competition data to Google Drive
 !kaggle competitions download -c cafa-6-protein-function-prediction \
