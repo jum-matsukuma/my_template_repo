@@ -95,16 +95,13 @@ drive.mount('/content/drive')
 
 # Setup Kaggle credentials (one-time)
 import os
-import json
-from getpass import getpass
+from google.colab import files
 
-print("Enter your Kaggle credentials:")
-kaggle_username = input("Kaggle Username: ")
-kaggle_key = getpass("Kaggle API Key: ")
-
+uploaded = files.upload()  # Upload kaggle.json
 os.makedirs('/root/.kaggle', exist_ok=True)
-with open('/root/.kaggle/kaggle.json', 'w') as f:
-    json.dump({"username": kaggle_username, "key": kaggle_key}, f)
+for filename, content in uploaded.items():
+    with open('/root/.kaggle/kaggle.json', 'wb') as f:
+        f.write(content)
 os.chmod('/root/.kaggle/kaggle.json', 0o600)
 
 # Download competition data to Google Drive
