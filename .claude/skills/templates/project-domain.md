@@ -1,6 +1,6 @@
 # Project Domain Knowledge Template
 
-Copy this template to `SKILLS/project/` and customize for your specific project domain.
+Copy this template to `.claude/skills/your-project/` and customize for your specific project domain.
 
 ## Domain Overview
 

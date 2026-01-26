@@ -53,9 +53,9 @@ my-competition/
 4. **Model Development**: Experiment with different algorithms
 5. **Ensemble Phase**: Combine models for final submission
 
-## SKILLS Integration
+## Skills Integration
 
-The Kaggle-specific SKILLS are available at `../SKILLS/kaggle/` and provide:
+The Kaggle-specific skills are available at `../.claude/skills/kaggle/` and provide:
 - Competition workflow patterns
 - ML modeling techniques
 - Data analysis strategies

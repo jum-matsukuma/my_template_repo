@@ -1,6 +1,6 @@
 # Custom Tools Template
 
-Copy this template to `SKILLS/project/` and customize for project-specific tools and utilities.
+Copy this template to `.claude/skills/your-project/` and customize for project-specific tools and utilities.
 
 ## Custom Tools and Utilities
 

@@ -5,7 +5,7 @@ A comprehensive template repository for individual software development projects
 ## What's Included
 
 - **CLAUDE.md**: Comprehensive guidance for Claude Code integration
-- **SKILLS**: Technical capabilities and development skills reference
+- **.claude/skills/**: Technical capabilities and development skills reference
 - **Subagent Configurations**: Specialized AI assistants for different development tasks
 - **Marketplace Templates**: Ready-to-use project templates and code snippets
 - **Development Settings**: Optimized configurations for various languages and tools
@@ -19,7 +19,7 @@ A comprehensive template repository for individual software development projects
 ## Files Overview
 
 - `CLAUDE.md` - Main guidance file for Claude Code (< 60 lines, following Anthropic best practices)
-- `SKILLS/` - Structured technical capabilities and domain knowledge
+- `.claude/skills/` - Structured technical capabilities and domain knowledge (Claude Code recommended format)
 - `.claude/agents.json` - Specialized AI assistant configurations
 - `.claude/commands/` - Custom slash commands for common tasks
 - `.claude/hooks/` - Automation hooks for git and development workflow
@@ -121,10 +121,10 @@ tech-innovation-advisorエージェントを使って、
 - **[Kaggle User Guide](docs/kaggle-user-guide.md)** - Complete development workflow with instruction examples
 
 **Technical Documentation:**
-- **[colab-workflow.md](SKILLS/kaggle/colab-workflow.md)** - Colab + Claude Code integration setup
-- **[data-analysis-workflow.md](SKILLS/kaggle/data-analysis-workflow.md)** - Step-by-step data analysis process
-- **[claude-friendly-outputs.md](SKILLS/kaggle/claude-friendly-outputs.md)** - Creating outputs for Claude review
-- **[kaggle-api-setup.md](SKILLS/kaggle/kaggle-api-setup.md)** - Kaggle CLI reference
+- **[colab-workflow.md](.claude/skills/kaggle/colab-workflow.md)** - Colab + Claude Code integration setup
+- **[data-analysis-workflow.md](.claude/skills/kaggle/data-analysis-workflow.md)** - Step-by-step data analysis process
+- **[claude-friendly-outputs.md](.claude/skills/kaggle/claude-friendly-outputs.md)** - Creating outputs for Claude review
+- **[kaggle-api-setup.md](.claude/skills/kaggle/kaggle-api-setup.md)** - Kaggle CLI reference
 
 ### Key Features
 

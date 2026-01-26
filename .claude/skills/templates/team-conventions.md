@@ -1,6 +1,6 @@
 # Team Conventions Template
 
-Copy this template to `SKILLS/project/` and customize for your team's coding standards and conventions.
+Copy this template to `.claude/skills/your-project/` and customize for your team's coding standards and conventions.
 
 ## Code Style and Standards
 

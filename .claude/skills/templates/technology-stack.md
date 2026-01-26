@@ -1,6 +1,6 @@
 # Technology Stack Template
 
-Copy this template to `SKILLS/project/` and customize for your specific technology choices.
+Copy this template to `.claude/skills/your-project/` and customize for your specific technology choices.
 
 ## Technology Stack Overview
 

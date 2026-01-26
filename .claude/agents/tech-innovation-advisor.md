@@ -65,7 +65,7 @@ When CLAUDE.md or other project context is available:
 - For this template repository specifically:
   - Leverage ES modules and functional patterns
   - Consider both Node.js and Python (uv-based) ecosystems
-  - Respect the SKILLS/ directory organization for capabilities
+  - Respect the .claude/skills/ directory organization for capabilities
   - Align with conventional commit and branching practices
 
 ## Communication Style

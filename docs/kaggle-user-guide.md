@@ -386,7 +386,7 @@ outputs/submissions/final_submission.csvとして保存してください。
 今日のタスク確認をお願いします：
 1. 昨日のコミット履歴を表示
 2. outputs/reports/の最新レポートを確認
-3. TODOリストの確認（SKILLS/kaggle/TODO.mdがあれば）
+3. TODOリストの確認（.claude/skills/kaggle/TODO.mdがあれば）
 4. 今日の作業提案
 ```
 
@@ -571,7 +571,7 @@ outputs/reports/eda_20260117.mdで年齢の欠損が20%あることがわかり�
 ## 参考ドキュメント
 
 詳細な手順は以下を参照：
-- `SKILLS/kaggle/colab-workflow.md` - 環境セットアップ
-- `SKILLS/kaggle/data-analysis-workflow.md` - 分析フロー
-- `SKILLS/kaggle/claude-friendly-outputs.md` - 出力フォーマット
-- `SKILLS/kaggle/kaggle-api-setup.md` - Kaggle API使用法
+- `.claude/skills/kaggle/colab-workflow.md` - 環境セットアップ
+- `.claude/skills/kaggle/data-analysis-workflow.md` - 分析フロー
+- `.claude/skills/kaggle/claude-friendly-outputs.md` - 出力フォーマット
+- `.claude/skills/kaggle/kaggle-api-setup.md` - Kaggle API使用法
