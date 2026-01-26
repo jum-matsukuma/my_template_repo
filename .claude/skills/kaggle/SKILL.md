@@ -1,7 +1,8 @@
 ---
 name: kaggle
-description: Kaggle competition development skills. Use when working on Kaggle competitions, ML modeling, data analysis, or using Kaggle API. Includes workflow patterns, API setup, Google Colab integration, and ML best practices.
+description: Kaggle competition development skills. Use when the user mentions Kaggle, competition, ML modeling, data analysis, feature engineering, model training, or asks about submitting predictions. Also use when working with kaggle CLI commands or Google Colab integration.
 user-invocable: true
+argument-hint: "[competition-name or topic]"
 ---
 
 # Kaggle Competition Development

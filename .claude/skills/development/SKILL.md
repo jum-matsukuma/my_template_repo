@@ -1,6 +1,6 @@
 ---
 name: development
-description: Core software development skills including architecture patterns, programming languages, and development tools. Provides background knowledge for general software engineering tasks.
+description: Background knowledge for software development. Automatically provides context about architecture patterns (layered, microservices, clean architecture), design patterns (factory, observer, repository), API design (REST, GraphQL), and development tools when Claude is working on general programming tasks.
 user-invocable: false
 ---
 
