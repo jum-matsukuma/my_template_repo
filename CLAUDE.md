@@ -45,7 +45,7 @@ uv run kaggle datasets list --search "query"  # Search datasets
 uv run kaggle datasets download user/dataset  # Download dataset
 ```
 
-See `SKILLS/kaggle/kaggle-api-setup.md` for detailed setup instructions.
+See `.claude/skills/kaggle/kaggle-api-setup.md` for detailed setup instructions.
 
 ## Code Style
 
@@ -57,8 +57,8 @@ See `SKILLS/kaggle/kaggle-api-setup.md` for detailed setup instructions.
 
 ## Workflow
 
-- Use SKILLS/ directory for project capabilities and domain knowledge
-- Copy templates from SKILLS/templates/ to SKILLS/project/ and customize
+- Use `.claude/skills/` directory for project capabilities and domain knowledge
+- Copy templates from `.claude/skills/templates/` to create new project-specific skills
 - Run typecheck after making code changes
 - Write tests for new functionality
 - Use conventional commit messages
@@ -71,13 +71,15 @@ project-root/
 ├── src/                 # Source code
 ├── tests/              # Test files
 ├── CLAUDE.md           # This file
-├── SKILLS/             # Project capabilities
-│   ├── core/           # General development skills
-│   ├── project/        # Project-specific skills
-│   ├── templates/      # Skill templates
-│   └── kaggle/         # Kaggle-specific skills (separate)
-├── kaggle-template/    # Kaggle competition template
 ├── .claude/            # Claude Code configurations
+│   └── skills/         # Skills directory (Claude Code recommended format)
+│       ├── kaggle/     # Kaggle competition skills
+│       │   └── SKILL.md
+│       ├── development/# Core development skills
+│       │   └── SKILL.md
+│       └── templates/  # Skill templates
+│           └── SKILL.md
+├── kaggle-template/    # Kaggle competition template
 └── README.md           # Project overview
 ```
 
@@ -103,7 +105,7 @@ For competitions requiring large datasets or GPU/TPU resources:
 - Develop code locally with Claude Code
 - Store data in Google Drive
 - Execute training on Google Colab
-- See `SKILLS/kaggle/colab-workflow.md` for complete setup guide
+- See `.claude/skills/kaggle/colab-workflow.md` for complete setup guide
 - Use `kaggle-template/colab_template.ipynb` as starting point
 
-The template includes specialized notebooks, directory structure, and access to Kaggle-specific SKILLS at `../SKILLS/kaggle/`.
+The template includes specialized notebooks, directory structure, and Kaggle-specific skills at `.claude/skills/kaggle/`.
