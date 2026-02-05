@@ -64,6 +64,28 @@ See `.claude/skills/kaggle/kaggle-api-setup.md` for detailed setup instructions.
 - Use conventional commit messages
 - Prefer composition over inheritance
 
+### Skills File Management
+
+- **SKILL.md** はスキルのエントリーポイント（インデックス）として100行以内に保つ
+- 詳細な内容は個別の支援ファイルに分割し、SKILL.mdから相対パスでリンクする
+- 各支援ファイルは1つのトピックに集中させ、100〜300行を目安とする
+- 支援ファイルが300行を超えた場合はさらに分割を検討する
+
+```
+.claude/skills/my-skill/
+├── SKILL.md                  # エントリーポイント（インデックス、~100行以内）
+├── topic-a.md                # トピックAの詳細（100-300行）
+├── topic-b-workflow.md       # トピックBのワークフロー（100-300行）
+└── topic-c.md                # トピックCの詳細（100-300行）
+```
+
+SKILL.mdでの参照例:
+```markdown
+## Available Resources
+- [topic-a.md](topic-a.md) - トピックAの説明
+- [topic-b-workflow.md](topic-b-workflow.md) - トピックBのワークフロー
+```
+
 ## File Structure
 
 ```
