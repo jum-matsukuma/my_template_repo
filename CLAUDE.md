@@ -86,6 +86,27 @@ SKILL.mdでの参照例:
 - [topic-b-workflow.md](topic-b-workflow.md) - トピックBのワークフロー
 ```
 
+## Agent Teams (Experimental)
+
+マルチエージェント協調ワークフロー機能。複数のClaude Codeセッションがチームとして連携する。
+
+### セットアップ
+`.claude/settings.json` で `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` を設定済み。
+
+### 定義済みエージェント（`.claude/agents/`）
+| エージェント | 用途 |
+|---|---|
+| `team-lead` | チームオーケストレーター |
+| `frontend-dev` | フロントエンド開発 |
+| `backend-dev` | バックエンド開発 |
+| `qa-tester` | テスト・QA |
+| `code-reviewer` | コードレビュー |
+| `tech-innovation-advisor` | 技術戦略アドバイス |
+
+### 使い方
+- チーム起動: `TeamCreate` → `TaskCreate` → `Task`（teammate spawn）
+- 詳細: `.claude/skills/teams/` を参照
+
 ## File Structure
 
 ```
@@ -94,10 +115,19 @@ project-root/
 ├── tests/              # Test files
 ├── CLAUDE.md           # This file
 ├── .claude/            # Claude Code configurations
+│   ├── agents/         # Custom agent definitions
+│   │   ├── team-lead.md
+│   │   ├── frontend-dev.md
+│   │   ├── backend-dev.md
+│   │   ├── qa-tester.md
+│   │   ├── code-reviewer.md
+│   │   └── tech-innovation-advisor.md
 │   └── skills/         # Skills directory (Claude Code recommended format)
 │       ├── kaggle/     # Kaggle competition skills
 │       │   └── SKILL.md
 │       ├── development/# Core development skills
+│       │   └── SKILL.md
+│       ├── teams/      # Agent Teams guide
 │       │   └── SKILL.md
 │       └── templates/  # Skill templates
 │           └── SKILL.md
