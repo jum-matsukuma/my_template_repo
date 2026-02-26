@@ -1,54 +1,5 @@
 {
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
-  "development": {
-    "auto_format": true,
-    "auto_lint": true,
-    "preferred_languages": ["typescript", "python", "rust", "go"],
-    "code_style": {
-      "typescript": {
-        "formatter": "prettier",
-        "linter": "eslint",
-        "strict_mode": true
-      },
-      "python": {
-        "formatter": "black",
-        "linter": "ruff",
-        "type_checker": "mypy"
-      },
-      "rust": {
-        "formatter": "rustfmt",
-        "linter": "clippy"
-      }
-    }
-  },
-  "testing": {
-    "auto_generate_tests": false,
-    "test_frameworks": {
-      "javascript": "vitest",
-      "python": "pytest", 
-      "rust": "cargo test"
-    },
-    "coverage_threshold": 80
-  },
-  "documentation": {
-    "auto_generate_docs": false,
-    "include_examples": true,
-    "api_doc_format": "openapi"
-  },
-  "security": {
-    "enable_security_checks": true,
-    "scan_dependencies": true,
-    "check_secrets": true
-  },
-  "performance": {
-    "enable_performance_hints": true,
-    "suggest_optimizations": true
-  },
-  "git": {
-    "conventional_commits": true,
-    "auto_stage_related_files": true,
-    "default_branch": "main"
   }
 }

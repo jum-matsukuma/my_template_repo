@@ -46,6 +46,9 @@ Team Lead (orchestrator)
 └── code-reviewer            → 各モジュールのレビュー
 ```
 
+> **Note**: `dev-1`, `dev-2` はチームメイト起動時の `name` パラメータ（任意のラベル）。
+> `general-purpose` は Claude Code 組み込みの汎用エージェントタイプで、`.claude/agents/` に定義ファイルは不要。
+
 ### タスク設計例
 
 ```

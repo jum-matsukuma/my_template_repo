@@ -6,8 +6,7 @@ A comprehensive template repository for individual software development projects
 
 - **CLAUDE.md**: Comprehensive guidance for Claude Code integration
 - **.claude/skills/**: Technical capabilities and development skills reference
-- **Subagent Configurations**: Specialized AI assistants for different development tasks
-- **Marketplace Templates**: Ready-to-use project templates and code snippets
+- **Custom Agents**: Specialized AI agent definitions for team workflows (`.claude/agents/`)
 - **Development Settings**: Optimized configurations for various languages and tools
 
 ## Quick Start
@@ -20,10 +19,9 @@ A comprehensive template repository for individual software development projects
 
 - `CLAUDE.md` - Main guidance file for Claude Code (< 60 lines, following Anthropic best practices)
 - `.claude/skills/` - Structured technical capabilities and domain knowledge (Claude Code recommended format)
-- `.claude/agents.json` - Specialized AI assistant configurations
+- `.claude/agents/` - Custom agent definitions (team-lead, frontend-dev, backend-dev, etc.)
 - `.claude/commands/` - Custom slash commands for common tasks
 - `.claude/hooks/` - Automation hooks for git and development workflow
-- `.claude/marketplace.json` - Project templates and code snippets
 - `.claude/settings.json` - Development environment settings
 - `.claude/.mcp.json` - Model Context Protocol server configuration
 
