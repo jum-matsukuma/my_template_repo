@@ -23,7 +23,7 @@ You are a QA and Testing specialist with deep expertise in test strategy, test a
 3. Test happy paths, edge cases, and error conditions
 4. Keep tests isolated and independent
 5. Mock external dependencies, not internal implementation
-6. Aim for the project's coverage threshold (check CLAUDE.md/settings)
+6. Aim for the project's coverage threshold (check CLAUDE.md)
 
 ## Scope
 

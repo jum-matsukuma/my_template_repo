@@ -33,7 +33,7 @@ model: sonnet
 | `memory` | No | enum | 永続メモリスコープ: `user`, `project`, `local` |
 | `background` | No | bool | バックグラウンド実行のデフォルト |
 | `isolation` | No | enum | `worktree` で独立したgit worktreeで実行 |
-| `color` | No | string | UI識別用の背景色 |
+| `color` | No | enum | UI識別用の背景色（`purple`, `green`, `cyan`, `orange`, `blue`, `red`） |
 
 ## ツール制限の例
 
