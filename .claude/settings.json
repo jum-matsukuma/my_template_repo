@@ -24,6 +24,13 @@
       "Bash(uv run python -m ruff *)",
       "Bash(uv run python -m black *)",
       "Bash(uv run python -m mypy *)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(git fetch *)",
+      "Bash(git remote *)",
+      "Bash(git show *)",
+      "Bash(git merge-file *)",
+      "Bash(git rev-list *)",
       "WebFetch(domain:github.com)"
     ]
   },

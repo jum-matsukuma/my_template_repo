@@ -170,9 +170,11 @@ git checkout template/<branch> -- <file>
 #### For conflict-risk files:
 - Attempt three-way merge using the last sync point as base:
   ```bash
-  git show <lastSyncCommit>:<file> > /tmp/base
-  git show template/<branch>:<file> > /tmp/theirs
-  git merge-file <file> /tmp/base /tmp/theirs
+  TMPDIR=$(mktemp -d)
+  trap 'rm -rf "$TMPDIR"' EXIT
+  git show <lastSyncCommit>:<file> > "$TMPDIR/base"
+  git show template/<branch>:<file> > "$TMPDIR/theirs"
+  git merge-file <file> "$TMPDIR/base" "$TMPDIR/theirs"
   ```
 - If merge succeeds cleanly, auto-apply
 - If conflicts remain, show them to the user for manual resolution

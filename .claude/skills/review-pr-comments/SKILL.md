@@ -28,23 +28,23 @@ Fetch both PR-level and review comments in parallel:
 
 ```bash
 # PR-level comments
-gh api /repos/{owner}/{repo}/issues/{number}/comments
+gh api --paginate /repos/{owner}/{repo}/issues/{number}/comments
 
 # Review comments (inline code comments)
-gh api /repos/{owner}/{repo}/pulls/{number}/comments
+gh api --paginate /repos/{owner}/{repo}/pulls/{number}/comments
 ```
 
 ### Step 3: Display and assess each comment
 
 For each comment, display in this format:
 
-```
+~~~
 - @author file.ts#line:
   ```diff
   [diff_hunk]
   ```
   > comment body
-```
+~~~
 
 Then create an assessment table:
 
