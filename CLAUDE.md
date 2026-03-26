@@ -96,12 +96,15 @@ SKILL.mdでの参照例:
 ### 定義済みエージェント（`.claude/agents/`）
 | エージェント | 用途 |
 |---|---|
-| `team-lead` | チームオーケストレーター |
+| `team-lead` | チームオーケストレーター（PDCA対応） |
 | `frontend-dev` | フロントエンド開発 |
 | `backend-dev` | バックエンド開発 |
 | `qa-tester` | テスト・QA |
 | `code-reviewer` | コードレビュー |
 | `tech-innovation-advisor` | 技術戦略アドバイス |
+| `experiment-engineer` | 実験実行・パラメータ変更・結果検証 |
+| `data-analyst` | データ分析・仮説生成 |
+| `notebook-developer` | Kaggle/Colabノートブック開発 |
 
 ### 使い方
 - チーム起動: `TeamCreate` → `TaskCreate` → `Task`（teammate spawn）
@@ -121,7 +124,10 @@ project-root/
 │   │   ├── backend-dev.md
 │   │   ├── qa-tester.md
 │   │   ├── code-reviewer.md
-│   │   └── tech-innovation-advisor.md
+│   │   ├── tech-innovation-advisor.md
+│   │   ├── experiment-engineer.md
+│   │   ├── data-analyst.md
+│   │   └── notebook-developer.md
 │   └── skills/         # Skills directory (Claude Code recommended format)
 │       ├── kaggle/     # Kaggle competition skills
 │       │   └── SKILL.md
@@ -161,3 +167,11 @@ For competitions requiring large datasets or GPU/TPU resources:
 - Use `kaggle-template/colab_template.ipynb` as starting point
 
 The template includes specialized notebooks, directory structure, and Kaggle-specific skills at `.claude/skills/kaggle/`.
+
+**Experiment Tracking (3-tier structure):**
+Kaggleコンペでは3層のファイルで知見を管理:
+- `SKILL.md` — 現在のベストパラメータ・ワークフロー・Next Steps（置換更新）
+- `EXPERIMENT_LOG.md` — 全実験結果の履歴（追記型）
+- `COMPETITION_TRACKER.md` — リーダーボード・公開ノートブック分析（置換更新）
+
+詳細: `.claude/skills/kaggle/experiment-tracking.md`

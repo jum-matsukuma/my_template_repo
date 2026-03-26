@@ -31,6 +31,8 @@ dev = [
 ]
 kaggle = [
     "kaggle>=1.5.0",
+    "biopython>=1.83",
+    "tqdm>=4.66.0",
     "pytorch-tabnet>=4.0.0",
     "shap>=0.47.0",
     "polars>=0.20.0",
@@ -41,6 +43,7 @@ kaggle = [
     "feature-engine>=1.6.0",
     "imbalanced-learn>=0.11.0",
     "category-encoders>=2.6.0",
+    "playwright>=1.40.0",
 ]
 test = [
     "pytest>=7.0.0",

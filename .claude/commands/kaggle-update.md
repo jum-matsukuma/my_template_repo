@@ -24,38 +24,35 @@ competition:
 
 別のコンペを指定: `/kaggle-update --comp other-competition-name`
 
-## Competition Tracker
+## Competition Tracker（3層構造）
 
-**重要**: 競技の動向は以下のファイルで追跡管理します:
+**重要**: 競技の動向は以下の3つのファイルで追跡管理します:
 
-```
-.claude/skills/<project-name>/SKILL.md
-```
+| ファイル | 内容 | 更新方式 |
+|---------|------|---------|
+| `.claude/skills/<project>/SKILL.md` | 現在のパラメータ、ワークフロー、Next Steps | 置換 |
+| `.claude/skills/<project>/EXPERIMENT_LOG.md` | 実験履歴、結果、教訓 | 追記 |
+| `.claude/skills/<project>/COMPETITION_TRACKER.md` | リーダーボード、公開ノートブック分析 | 置換 |
 
-このファイルには以下の情報を含めます:
-- リーダーボード状況
-- 公開解法の動向とアプローチ分類
-- 重要な発見・テクニック
-- タイムライン
-- 未解決の課題と改善アイデア
+詳細: `.claude/skills/kaggle/experiment-tracking.md` を参照
 
 ### Tracker更新ルール
 
-`/kaggle-update` 実行時に以下の場合は SKILL.md を更新:
+`/kaggle-update` 実行時の更新先:
 
-1. **リーダーボードに大きな変動があった場合**
+1. **リーダーボードに大きな変動があった場合** → `COMPETITION_TRACKER.md`
    - 新しいトップスコアが出た
    - 順位に大きな変動があった
 
-2. **新しい重要なノートブックが公開された場合**
+2. **新しい重要なノートブックが公開された場合** → `COMPETITION_TRACKER.md`
    - 高投票数の新規ノートブック
    - 新しいアプローチや手法
 
 3. **重要なテクニックを発見した場合**
-   - スコア改善に繋がる新しい知見
-   - 既存手法の改良ポイント
+   - 採用候補 → `SKILL.md` の Next Steps に追加
+   - 実験済み → `EXPERIMENT_LOG.md` に結果を記録
 
-更新時はSKILL.mdの「Last updated」日付も更新すること。
+更新時は各ファイルの「Last updated」日付も更新すること。
 
 ### アーカイブルール
 
@@ -167,14 +164,16 @@ Kaggle コンペ更新情報
 ------------------------------------------------------------
 Tracker更新
 ------------------------------------------------------------
-[SKILL.md への更新内容があれば記載]
+[COMPETITION_TRACKER.md / SKILL.md への更新内容があれば記載]
 
 ------------------------------------------------------------
 手動確認リンク
 ------------------------------------------------------------
 - Discussions: URL
 - Announcements: URL
-- Competition Tracker: .claude/skills/<project-name>/SKILL.md
+- SKILL.md: .claude/skills/<project-name>/SKILL.md
+- EXPERIMENT_LOG: .claude/skills/<project-name>/EXPERIMENT_LOG.md
+- COMPETITION_TRACKER: .claude/skills/<project-name>/COMPETITION_TRACKER.md
 ============================================================
 ```
 
