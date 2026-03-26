@@ -141,10 +141,13 @@ isolation: worktree
 
 ```
 .claude/agents/
-├── team-lead.md              # チームオーケストレーター
+├── team-lead.md              # チームオーケストレーター（PDCA対応）
 ├── frontend-dev.md           # フロントエンド開発
 ├── backend-dev.md            # バックエンド開発
 ├── qa-tester.md              # テスト・QA
 ├── code-reviewer.md          # コードレビュー
-└── tech-innovation-advisor.md # 技術戦略アドバイス
+├── tech-innovation-advisor.md # 技術戦略アドバイス
+├── experiment-engineer.md    # 実験実行・パラメータ変更・結果検証
+├── data-analyst.md           # データ分析・仮説生成
+└── notebook-developer.md     # Kaggle/Colabノートブック開発
 ```

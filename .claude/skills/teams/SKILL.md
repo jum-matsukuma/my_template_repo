@@ -39,25 +39,36 @@ Agent Teams は実験的機能。有効化には環境変数が必要:
 
 | エージェント | 用途 | モデル |
 |---|---|---|
-| `team-lead` | チームオーケストレーター | sonnet |
+| `team-lead` | チームオーケストレーター（PDCA対応） | sonnet |
 | `frontend-dev` | フロントエンド開発 | sonnet |
 | `backend-dev` | バックエンド開発 | sonnet |
 | `qa-tester` | テスト・QA | sonnet |
 | `code-reviewer` | コードレビュー | sonnet |
 | `tech-innovation-advisor` | 技術戦略アドバイス | opus |
+| `experiment-engineer` | 実験実行・パラメータ変更・結果検証 | sonnet |
+| `data-analyst` | データ分析・仮説生成 | sonnet |
+| `notebook-developer` | Kaggle/Colabノートブック開発 | sonnet |
 
 ### チームサイズの目安
 
-- **3-5人**: 一般的なワークフロー向け
-- **5-6タスク/人**: 最適な生産性バランス
-- **例**: 15個の独立タスク → 3人のチームメイト
+- **3-5人**: 一般的なワークフロー向け（ソフトウェア開発）
+- **2-3人**: Kaggle実験サイクル向け（analyst + engineer + developer）
+- **3-5タスク/人**: 最適な生産性バランス
 
 ### ファイル所有権ルール
 
 チームメイト間のマージコンフリクトを防ぐため、ファイル所有権を明確に分離:
 
+**ソフトウェア開発:**
 ```
 frontend-dev: src/components/, src/pages/, src/hooks/
 backend-dev:  src/api/, src/services/, src/models/
 qa-tester:    tests/, __tests__/, *.test.*
+```
+
+**Kaggle/ML実験:**
+```
+experiment-engineer: kaggle-template/submissions/, scripts/
+notebook-developer:  kaggle-template/*.ipynb, notebooks/
+data-analyst:        .claude/skills/<project>/, docs/
 ```

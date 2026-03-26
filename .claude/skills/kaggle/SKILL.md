@@ -29,10 +29,12 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 - [colab-workflow.md](colab-workflow.md) - Google Colab + Claude Code development workflow
 - [claude-friendly-outputs.md](claude-friendly-outputs.md) - Creating outputs Claude can review locally
 - [data-analysis-workflow.md](data-analysis-workflow.md) - Complete data analysis workflow with Claude + Colab
+- [notebook-development-guide.md](notebook-development-guide.md) - Colab/Kaggle デュアル環境ノートブック開発ガイド
 
 ### Core Competition Skills
 - [kaggle-workflow.md](kaggle-workflow.md) - Efficient competition workflow patterns
 - [competition-strategy.md](competition-strategy.md) - Strategic competition management
+- [experiment-tracking.md](experiment-tracking.md) - 実験トラッキング3層構造パターン
 - [ml-modeling.md](ml-modeling.md) - Machine learning modeling techniques
 - [data-analysis.md](data-analysis.md) - Data analysis and preprocessing
 

@@ -100,6 +100,88 @@ Team Lead (orchestrator)
 
 ---
 
+## Pattern 5: 仮説駆動実験サイクル（Kaggle/ML）
+
+データ分析→仮説設計→実験実行→検証→記録のPDCAサイクル。
+
+### 構成
+
+```
+Team Lead (orchestrator)
+├── data-analyst        → データ分析・仮説提案
+├── experiment-engineer → パラメータ変更・実験実行・検証
+└── notebook-developer  → ノートブック修正（必要時のみ）
+```
+
+### タスク設計例
+
+```
+Task 1: [data-analyst]        EXPERIMENT_LOG分析 → 次の仮説3つ提案
+Task 2: [experiment-engineer]  仮説A: learning_rate=0.001 で実験 (blockedBy: 1)
+Task 3: [experiment-engineer]  仮説B: batch_size=64 で実験 (blockedBy: 1)
+Task 4: [data-analyst]        実験結果の比較分析 → EXPERIMENT_LOG更新 (blockedBy: 2, 3)
+```
+
+### ポイント
+- data-analyst が先に仮説を設計し、engineer がそれを実行
+- 独立した仮説は並行実行可能
+- 結果分析は全実験完了を待つ（`blockedBy` で依存関係を設定）
+
+---
+
+## Pattern 6: リーダーボード分析スプリント（Kaggle）
+
+定期的なリーダーボード分析と競合手法調査。
+
+### 構成
+
+```
+Team Lead (synthesizer)
+├── data-analyst    → リーダーボード動向分析
+├── researcher (Explore) → 公開ノートブック精読・手法抽出
+└── researcher (Explore) → Discussion フォーラム調査
+```
+
+### タスク設計例
+
+```
+Task 1: [data-analyst]  リーダーボード上位10チームのスコア推移分析
+Task 2: [researcher-1]  新着上位ノートブック3つの手法抽出
+Task 3: [researcher-2]  Discussion から有用な知見を収集
+Task 4: [data-analyst]  COMPETITION_TRACKER更新 (blockedBy: 1, 2, 3)
+```
+
+### ポイント
+- `researcher` は `.claude/agents/` に定義ファイルを持たない。`Task` ツールで `subagent_type: "Explore"` を指定
+- `name` パラメータ（`"researcher-1"`, `"researcher-2"`）でチーム内のラベルを区別
+- data-analyst が結果を統合して COMPETITION_TRACKER を更新
+
+---
+
+## Pattern 7: 提出準備ワークフロー（Kaggle）
+
+実験結果を Kaggle 提出用ノートブックにまとめる。
+
+### 構成
+
+```
+Team Lead (orchestrator)
+├── notebook-developer   → ノートブック修正・提出準備
+├── experiment-engineer  → 出力CSV検証・スコア確認
+└── code-reviewer        → ノートブックレビュー
+```
+
+### タスク設計例
+
+```
+Task 1: [notebook-developer]   最新パラメータでノートブック更新
+Task 2: [experiment-engineer]  出力CSVフォーマット検証 (blockedBy: 1)
+Task 3: [code-reviewer]        ノートブックレビュー (blockedBy: 1)
+Task 4: [notebook-developer]   レビュー指摘の修正 (blockedBy: 3)
+```
+
+---
+
 ## Anti-Patterns（避けるべきパターン）
 
 ### 1. 同じファイルへの同時書き込み
@@ -165,4 +247,20 @@ TaskCreate({ subject: "Write tests", description: "...", activeForm: "Writing te
 Task({ subagent_type: "backend-dev", name: "backend", team_name: "feature-x", prompt: "..." })
 Task({ subagent_type: "frontend-dev", name: "frontend", team_name: "feature-x", prompt: "..." })
 Task({ subagent_type: "qa-tester", name: "tester", team_name: "feature-x", prompt: "..." })
+```
+
+### Kaggle 実験サイクルチーム
+
+```javascript
+// 1. チーム作成
+TeamCreate({ team_name: "experiment-v7", description: "v7 experiment cycle" })
+
+// 2. タスク作成
+TaskCreate({ subject: "Analyze results and propose hypotheses", description: "...", activeForm: "Analyzing experiments" })
+TaskCreate({ subject: "Run experiment: learning_rate=0.001", description: "...", activeForm: "Running experiment" })
+TaskCreate({ subject: "Update EXPERIMENT_LOG with results", description: "...", activeForm: "Recording results" })
+
+// 3. チームメイト起動
+Task({ subagent_type: "data-analyst", name: "analyst", team_name: "experiment-v7", prompt: "..." })
+Task({ subagent_type: "experiment-engineer", name: "engineer", team_name: "experiment-v7", prompt: "..." })
 ```

@@ -82,3 +82,44 @@ Always assign non-overlapping file sets to teammates to prevent merge conflicts:
 - Use `type: "broadcast"` only for critical team-wide announcements (costs N messages)
 - Include clear context in task descriptions (teammates do NOT inherit conversation history)
 - Report summarized results back to the user after all work is complete
+
+## PDCA Cycle (Kaggle/ML Experimentation)
+
+KaggleコンペやイテレーティブなML実験では、PDCAサイクルでチームを管理する:
+
+### Plan（計画）
+1. `EXPERIMENT_LOG.md` から過去の実験パターンを確認
+2. `COMPETITION_TRACKER.md` から動向を確認
+3. 次の実験仮説を3つ以内に絞り込む（ROIで優先順位付け）
+
+### Do（実行）
+1. experiment-engineer に実験パラメータの変更を指示
+2. notebook-developer にノートブックの修正を指示
+3. 並行実行可能なタスクは並行で割り当てる
+
+### Check（検証）
+1. experiment-engineer からの検証結果を収集
+2. 仮説の成否を判定
+
+### Act（改善）
+1. experiment-engineer に `EXPERIMENT_LOG.md` への記録を依頼
+2. 成功パラメータを SKILL.md に反映
+3. 次サイクルの仮説を提案
+
+### ML/Kaggle チーム編成ガイド
+
+| タスク種類 | 担当エージェント |
+|-----------|----------------|
+| パラメータ変更・実行・検証 | experiment-engineer |
+| ノートブック修正・提出準備 | notebook-developer |
+| データ分析・仮説生成 | data-analyst |
+| コード品質確認 | code-reviewer |
+| 戦略的方向性の判断 | tech-innovation-advisor |
+
+### ML/Kaggle ファイル所有権
+
+```
+experiment-engineer: kaggle-template/submissions/, scripts/
+notebook-developer:  kaggle-template/*.ipynb, notebooks/
+data-analyst:        .claude/skills/<project>/, docs/
+```
