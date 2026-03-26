@@ -31,7 +31,6 @@ dev = [
 ]
 kaggle = [
     "kaggle>=1.5.0",
-    "biopython>=1.83",
     "tqdm>=4.66.0",
     "pytorch-tabnet>=4.0.0",
     "shap>=0.47.0",
