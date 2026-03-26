@@ -31,21 +31,15 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 - [data-analysis-workflow.md](data-analysis-workflow.md) - Complete data analysis workflow with Claude + Colab
 - [notebook-development-guide.md](notebook-development-guide.md) - Colab/Kaggle デュアル環境ノートブック開発ガイド
 
-### Core Competition Skills
-- [kaggle-workflow.md](kaggle-workflow.md) - Efficient competition workflow patterns
-- [competition-strategy.md](competition-strategy.md) - Strategic competition management
+### Competition Workflow
 - [experiment-tracking.md](experiment-tracking.md) - 実験トラッキング3層構造パターン
-- [ml-modeling.md](ml-modeling.md) - Machine learning modeling techniques
-- [data-analysis.md](data-analysis.md) - Data analysis and preprocessing
+- [solution-strategy.md](solution-strategy.md) - 競技フェーズ別の戦略・リソース配分
 
-### Detailed Knowledge Base
-- [kaggle-competition.md](kaggle-competition.md) - Competition-specific information template
-- [data-understanding.md](data-understanding.md) - Dataset analysis and feature documentation
-- [competition-insights.md](competition-insights.md) - Community insights and discussions
-- [solution-strategy.md](solution-strategy.md) - Solution approach and methodology
-- [feature-engineering.md](feature-engineering.md) - Feature engineering patterns
-- [model-zoo.md](model-zoo.md) - Model configurations and strategies
-- [evaluation-metrics.md](evaluation-metrics.md) - Validation and evaluation frameworks
+### ML Reference
+- [data-understanding.md](data-understanding.md) - データセット分析・特徴量ドキュメントテンプレート
+- [feature-engineering.md](feature-engineering.md) - 特徴量エンジニアリングパターン集
+- [model-zoo.md](model-zoo.md) - モデル別ハイパーパラメータ設定・学習コード例
+- [evaluation-metrics.md](evaluation-metrics.md) - 評価指標・バリデーション戦略
 
 ## Competition Setup
 
