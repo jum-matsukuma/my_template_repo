@@ -26,6 +26,7 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 
 ### Setup and Tools
 - [kaggle-api-setup.md](kaggle-api-setup.md) - Kaggle API installation and authentication guide
+- [kaggle-scraping.md](kaggle-scraping.md) - Playwright スクレイピング + discussion 一括取得スクリプト
 - [colab-workflow.md](colab-workflow.md) - Google Colab + Claude Code development workflow
 - [claude-friendly-outputs.md](claude-friendly-outputs.md) - Creating outputs Claude can review locally
 - [data-analysis-workflow.md](data-analysis-workflow.md) - Complete data analysis workflow with Claude + Colab
