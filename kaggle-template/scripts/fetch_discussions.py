@@ -7,15 +7,17 @@ Hybrid approach:
   (required because Kaggle validates browser context for this endpoint)
 
 Usage:
-    uv run python scripts/fetch_discussions.py                    # Full fetch
-    uv run python scripts/fetch_discussions.py --topics-only      # List only
-    uv run python scripts/fetch_discussions.py --resume --delay 1  # Resume incomplete
-    uv run python scripts/fetch_discussions.py --limit 10          # First 10 details
+    uv run python scripts/fetch_discussions.py --competition <slug>                    # Full fetch
+    uv run python scripts/fetch_discussions.py --competition <slug> --topics-only      # List only
+    uv run python scripts/fetch_discussions.py --competition <slug> --resume --delay 1 # Resume incomplete
+    uv run python scripts/fetch_discussions.py --competition <slug> --limit 10         # First 10 details
 
 Requirements:
-    uv pip install playwright requests
+    uv sync --extra kaggle
     uv run playwright install chromium
 """
+
+from __future__ import annotations
 
 import asyncio
 import argparse
@@ -126,7 +128,6 @@ async def fetch_topic_details_batch(
     competition_slug: str,
     topic_ids: list[int],
     delay: float = 1.0,
-    batch_size: int = 1,
 ) -> dict[str, dict]:
     """Fetch topic details by visiting each page in Playwright."""
     results = {}
@@ -200,9 +201,9 @@ async def fetch_topic_details_batch(
             results[str(tid)] = ft
             await page.close()
 
-            # Periodic save every 50 topics
+            # Progress marker (note: results are persisted only at the end)
             if (i + 1) % 50 == 0:
-                print(f"    [checkpoint: {len(results)} topics saved]")
+                print(f"    [progress: {len(results)} topics fetched]")
 
             await asyncio.sleep(delay)
 
@@ -286,7 +287,7 @@ def save_outputs(
     output_dir: Path, competition: str,
 ):
     details_path = output_dir / "discussions_full.json"
-    with open(details_path, "w") as f:
+    with open(details_path, "w", encoding="utf-8") as f:
         json.dump(
             {
                 "competition": competition,
@@ -314,11 +315,11 @@ def save_outputs(
         if not safe:
             safe = "Untitled"
         md_path = md_dir / f"{tid}_{safe}.md"
-        with open(md_path, "w") as f:
+        with open(md_path, "w", encoding="utf-8") as f:
             f.write(format_discussion_markdown(detail, meta))
         index_lines.append(f"- [{title}](markdown/{md_path.name}) ({len(all_comments)} messages)")
 
-    with open(output_dir / "INDEX.md", "w") as f:
+    with open(output_dir / "INDEX.md", "w", encoding="utf-8") as f:
         f.write("\n".join(index_lines))
     print(f"  Saved markdown to {md_dir}/")
 
@@ -406,17 +407,17 @@ def main():
     # Fallback to previous data if fetch failed
     if not all_topics and args.resume:
         if topic_list_path.exists():
-            with open(topic_list_path) as f:
+            with open(topic_list_path, encoding="utf-8") as f:
                 all_topics = json.load(f).get("topics", [])
         if not all_topics and details_path.exists():
-            with open(details_path) as f:
+            with open(details_path, encoding="utf-8") as f:
                 for tid, d in json.load(f).get("topics", {}).items():
                     all_topics.append({"id": int(tid), "title": d.get("title", "")})
         if all_topics:
             print(f"  Loaded {len(all_topics)} from previous run")
 
     if all_topics:
-        with open(topic_list_path, "w") as f:
+        with open(topic_list_path, "w", encoding="utf-8") as f:
             json.dump({
                 "competition": args.competition, "forumId": forum_id,
                 "totalTopics": len(all_topics),
@@ -431,7 +432,7 @@ def main():
     existing = {}
     prev_fetched_at = None
     if (args.resume or args.update) and details_path.exists():
-        with open(details_path) as f:
+        with open(details_path, encoding="utf-8") as f:
             prev_data = json.load(f)
         existing = prev_data.get("topics", {})
         prev_fetched_at = prev_data.get("fetchedAt")
