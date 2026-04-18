@@ -8,6 +8,7 @@
 - `/kaggle-update leaderboard` - リーダーボードのみ
 - `/kaggle-update notebooks` - ノートブック一覧のみ
 - `/kaggle-update submissions` - 自分の提出履歴のみ
+- `/kaggle-update discussions` - ディスカッション取得（増分更新）
 - `/kaggle-update $ARGUMENTS` - カスタム引数で実行
 
 ## Competition Target
@@ -112,9 +113,43 @@ uv run kaggle kernels pull <kernel-ref> -p data/kaggle_notebooks/<notebook-name>
 uv run kaggle competitions submissions <competition-name>
 ```
 
-### 4. 手動確認リンク (API非対応)
-- Discussions: https://www.kaggle.com/competitions/<competition-name>/discussion
-- Announcements: https://www.kaggle.com/competitions/<competition-name>/discussion?sort=top
+### 4. ディスカッション
+Playwright ベースのスクレイパーで全ディスカッション + コメントを取得:
+```bash
+# 増分更新（推奨: 新規・更新トピックのみ取得、~1-2分）
+uv run python scripts/fetch_discussions.py --competition <competition-name> --update --delay 10.0
+
+# 初回フル取得（全トピック、~50-60分）
+uv run python scripts/fetch_discussions.py --competition <competition-name> --delay 10.0
+
+# トピック一覧のみ（高速）
+uv run python scripts/fetch_discussions.py --competition <competition-name> --topics-only
+
+# 中断再開
+uv run python scripts/fetch_discussions.py --competition <competition-name> --resume --delay 10.0
+```
+
+**出力先**: `docs/discussions/`
+```
+docs/discussions/
+├── topic_list.json          # トピック一覧メタデータ
+├── discussions_full.json    # 全トピック詳細 + コメント
+├── INDEX.md                 # Markdown インデックス
+└── markdown/                # トピック別 .md ファイル
+```
+
+**注意事項**:
+- 初回は `--delay 10.0` を推奨（Kaggle レートリミット対策）
+- `--update` は前回の `discussions_full.json` の `fetchedAt` を基準に差分検出
+- Playwright + Chromium が必要: `uv sync --extra kaggle && uv run playwright install chromium`
+- スクリプト詳細・内部 API の仕組みは `.claude/skills/kaggle/kaggle-scraping.md` を参照
+
+**取得後のアクション**:
+1. `docs/discussions/INDEX.md` を読んで新しいトピックを確認
+2. 重要な知見は `COMPETITION_TRACKER.md` に反映
+3. 採用候補のテクニックは `SKILL.md` の Next Steps に追加
+
+### 5. 手動確認リンク
 - Overview: https://www.kaggle.com/competitions/<competition-name>/overview
 
 ## Notebook Storage
