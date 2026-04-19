@@ -10,7 +10,6 @@
 
 以下のいずれかに該当する場合、ユーザーの最初の指示に応答する**前に**このセットアップを実行する:
 - `pyproject.toml` の `name` が `"mytools-python"` のままである
-- `src/mytools/` ディレクトリが存在する
 - `README.md` の先頭が `# Personal Development Template` である
 
 ### セットアップ手順
@@ -40,7 +39,7 @@
 | `backend` | 上記（`kaggle-template/`等） + `.claude/agents/frontend-dev.md` |
 | `kaggle` | `.claude/agents/frontend-dev.md`, `.claude/agents/backend-dev.md` |
 | `python` | `kaggle-template/`, `.claude/agents/frontend-dev.md`, `.claude/agents/backend-dev.md`, `.claude/agents/experiment-engineer.md`, `.claude/agents/data-analyst.md`, `.claude/agents/notebook-developer.md`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
-| `node` | `kaggle-template/`, `pyproject.toml`, `src/mytools/`, `tests/`, `.claude/agents/experiment-engineer.md`, `.claude/agents/data-analyst.md`, `.claude/agents/notebook-developer.md`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
+| `node` | `kaggle-template/`, `pyproject.toml`, `.claude/agents/experiment-engineer.md`, `.claude/agents/data-analyst.md`, `.claude/agents/notebook-developer.md`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
 
 **注意**: 削除前にファイル一覧をユーザーに提示し、確認を取ること。
 
@@ -51,11 +50,10 @@
 | 対象ファイル | 置換内容 |
 |-------------|---------|
 | `pyproject.toml` | `name = "mytools-python"` → プロジェクト名、`description`、`authors` |
-| `src/mytools/` | ディレクトリ名をプロジェクト名に変更（`src/<project>/`） |
-| `src/<project>/__init__.py` | docstring をプロジェクト説明に更新 |
-| `tests/test_*.py` | import パスを `from mytools.` → `from <project>.` に更新 |
 | `README.md` | プロジェクト名・説明に書き換え |
 | `CLAUDE.md` | Repository Purpose セクションをプロジェクト説明に更新 |
+
+ソースコードを配布パッケージとして扱う場合は、`pyproject.toml` から `[tool.uv] package = false` を外し、`[build-system]` と `[tool.hatch.build.targets.wheel]` を追加する（テンプレート初期状態はビルドなしの dependency container）。
 
 #### Step 4: CLAUDE.md の整理
 
@@ -153,10 +151,10 @@ SKILL.mdでの参照例:
 
 ## File Structure
 
+ソースコードと tests ディレクトリはテンプレートには含まれていない。プロジェクトごとに `src/<project>/` / `tests/` を作成する想定。
+
 ```
 project-root/
-├── src/                 # Source code
-├── tests/              # Test files
 ├── CLAUDE.md           # This file
 ├── .claude/            # Claude Code configurations
 │   ├── agents/         # Custom agent definitions
