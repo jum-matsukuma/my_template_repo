@@ -49,8 +49,8 @@ Complete guide for Kaggle competition development using Claude Code locally with
 
 ```bash
 # Create competition directory
-mkdir -p kaggle-competitions/cafa-6
-cd kaggle-competitions/cafa-6
+mkdir -p kaggle-competitions/my-competition
+cd kaggle-competitions/my-competition
 
 # Initialize Python environment
 uv init
@@ -58,7 +58,7 @@ uv sync --extra kaggle
 
 # Initialize git repository
 git init
-git remote add origin https://github.com/your-username/cafa-6.git
+git remote add origin https://github.com/your-username/my-competition.git
 ```
 
 ### 2. Google Drive Structure
@@ -68,7 +68,7 @@ Create the following structure in Google Drive:
 ```
 My Drive/
 └── kaggle/
-    └── cafa-6/
+    └── my-competition/
         ├── data/
         │   ├── raw/              # Original competition data
         │   ├── processed/        # Preprocessed datasets
@@ -105,15 +105,15 @@ for filename, content in uploaded.items():
 os.chmod('/root/.kaggle/kaggle.json', 0o600)
 
 # Download competition data to Google Drive
-!kaggle competitions download -c cafa-6-protein-function-prediction \
-    -p /content/drive/MyDrive/kaggle/cafa-6/data/raw/
+!kaggle competitions download -c your-competition-slug \
+    -p /content/drive/MyDrive/kaggle/my-competition/data/raw/
 ```
 
 **Option B: Upload from local**
 
 ```bash
 # Use Google Drive desktop app or web interface
-# Upload data files to Drive/kaggle/cafa-6/data/raw/
+# Upload data files to Drive/kaggle/my-competition/data/raw/
 ```
 
 ## Development Workflow
@@ -128,7 +128,7 @@ Create modular Python code in your local repository:
 Data loading utilities for Colab environment.
 """
 
-def load_train_data(drive_path='/content/drive/MyDrive/kaggle/cafa-6/data/raw'):
+def load_train_data(drive_path='/content/drive/MyDrive/kaggle/my-competition/data/raw'):
     """Load training data from Google Drive."""
     import pandas as pd
     from pathlib import Path
@@ -137,7 +137,7 @@ def load_train_data(drive_path='/content/drive/MyDrive/kaggle/cafa-6/data/raw'):
     train_df = pd.read_csv(data_path / 'train.csv')
     return train_df
 
-def load_test_data(drive_path='/content/drive/MyDrive/kaggle/cafa-6/data/raw'):
+def load_test_data(drive_path='/content/drive/MyDrive/kaggle/my-competition/data/raw'):
     """Load test data from Google Drive."""
     import pandas as pd
     from pathlib import Path
@@ -203,13 +203,13 @@ from google.colab import drive
 drive.mount('/content/drive')
 
 # Define paths
-DRIVE_BASE = '/content/drive/MyDrive/kaggle/cafa-6'
+DRIVE_BASE = '/content/drive/MyDrive/kaggle/my-competition'
 DATA_PATH = f'{DRIVE_BASE}/data/raw'
 MODEL_PATH = f'{DRIVE_BASE}/models'
 OUTPUT_PATH = f'{DRIVE_BASE}/outputs'
 
 # 2. Clone your GitHub repository
-!git clone https://github.com/your-username/cafa-6.git /content/repo
+!git clone https://github.com/your-username/my-competition.git /content/repo
 %cd /content/repo
 
 # 3. Install dependencies
@@ -478,7 +478,7 @@ from google.colab import files
 uploaded = files.upload()  # Select your .py file
 
 # Or copy from Drive
-!cp /content/drive/MyDrive/kaggle/cafa-6/src/*.py /content/repo/src/
+!cp /content/drive/MyDrive/kaggle/my-competition/src/*.py /content/repo/src/
 ```
 
 ### 3. Download Results to Local
@@ -524,11 +524,11 @@ if 'COLAB_TPU_ADDR' in os.environ:
 **Solutions:**
 ```python
 # Copy data to Colab local storage first
-!cp -r /content/drive/MyDrive/kaggle/cafa-6/data/raw /content/data
+!cp -r /content/drive/MyDrive/kaggle/my-competition/data/raw /content/data
 DATA_PATH = '/content/data'
 
 # Process locally, save results back to Drive
-# model.save('/content/drive/MyDrive/kaggle/cafa-6/models/model.pkl')
+# model.save('/content/drive/MyDrive/kaggle/my-competition/models/model.pkl')
 ```
 
 ### Issue: Module import errors after code update
@@ -573,7 +573,7 @@ gc.collect()
 # === Local Setup (Claude Code) ===
 
 # 1. Create repository
-mkdir cafa-6 && cd cafa-6
+mkdir my-competition && cd my-competition
 git init
 
 # 2. Setup Python environment
@@ -589,7 +589,7 @@ git add .
 git commit -m "chore: initial project structure"
 
 # 5. Push to GitHub
-git remote add origin https://github.com/username/cafa-6.git
+git remote add origin https://github.com/username/my-competition.git
 git push -u origin main
 ```
 
@@ -601,10 +601,10 @@ from google.colab import drive
 drive.mount('/content/drive')
 
 import os
-os.makedirs('/content/drive/MyDrive/kaggle/cafa-6/data/raw', exist_ok=True)
-os.makedirs('/content/drive/MyDrive/kaggle/cafa-6/models', exist_ok=True)
-os.makedirs('/content/drive/MyDrive/kaggle/cafa-6/submissions', exist_ok=True)
-os.makedirs('/content/drive/MyDrive/kaggle/cafa-6/outputs', exist_ok=True)
+os.makedirs('/content/drive/MyDrive/kaggle/my-competition/data/raw', exist_ok=True)
+os.makedirs('/content/drive/MyDrive/kaggle/my-competition/models', exist_ok=True)
+os.makedirs('/content/drive/MyDrive/kaggle/my-competition/submissions', exist_ok=True)
+os.makedirs('/content/drive/MyDrive/kaggle/my-competition/outputs', exist_ok=True)
 
 print("Google Drive structure created!")
 ```

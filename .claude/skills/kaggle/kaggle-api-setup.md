@@ -147,11 +147,11 @@ uv run kaggle models instances versions download username/model-name/framework/v
 
 ```bash
 # Get competition files
-uv run kaggle competitions download -c cafa-6-protein-function-prediction
+uv run kaggle competitions download -c your-competition-slug
 
 # Download top notebooks
 uv run kaggle kernels list \
-  --competition cafa-6-protein-function-prediction \
+  --competition your-competition-slug \
   --sort-by voteCount \
   --page-size 5
 
@@ -258,7 +258,7 @@ export KAGGLE_VERIFY_SSL=false
 #!/bin/bash
 # setup-competition.sh
 
-COMP_NAME="cafa-6-protein-function-prediction"
+COMP_NAME="your-competition-slug"
 
 # Create directory structure
 mkdir -p competition/$COMP_NAME/{data,notebooks,submissions}

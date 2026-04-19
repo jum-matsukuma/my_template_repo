@@ -103,20 +103,8 @@ uv run jupyter lab              # Start JupyterLab
 ```
 
 ### Kaggle API Commands
-```bash
-# Setup: Place kaggle.json in ~/.kaggle/ (get from kaggle.com/account)
-uv run kaggle competitions list              # List competitions
-uv run kaggle competitions download -c NAME  # Download competition data
-uv run kaggle competitions submit -c NAME -f submission.csv -m "Message"
 
-uv run kaggle kernels list --competition NAME --sort-by voteCount  # Top notebooks
-uv run kaggle kernels pull user/notebook-name -p ./notebooks/      # Download notebook
-
-uv run kaggle datasets list --search "query"  # Search datasets
-uv run kaggle datasets download user/dataset  # Download dataset
-```
-
-See `.claude/skills/kaggle/kaggle-api-setup.md` for detailed setup instructions.
+Kaggle CLI のセットアップと全コマンドリファレンスは `.claude/skills/kaggle/kaggle-api-setup.md` を参照。
 
 ## Code Style
 
@@ -159,27 +147,9 @@ SKILL.mdでの参照例:
 
 ## Agent Teams (Experimental)
 
-マルチエージェント協調ワークフロー機能。複数のClaude Codeセッションがチームとして連携する。
+マルチエージェント協調ワークフロー機能。`.claude/settings.json` で `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` を設定済み。
 
-### セットアップ
-`.claude/settings.json` で `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` を設定済み。
-
-### 定義済みエージェント（`.claude/agents/`）
-| エージェント | 用途 |
-|---|---|
-| `team-lead` | チームオーケストレーター（PDCA対応） |
-| `frontend-dev` | フロントエンド開発 |
-| `backend-dev` | バックエンド開発 |
-| `qa-tester` | テスト・QA |
-| `code-reviewer` | コードレビュー |
-| `tech-innovation-advisor` | 技術戦略アドバイス |
-| `experiment-engineer` | 実験実行・パラメータ変更・結果検証 |
-| `data-analyst` | データ分析・仮説生成 |
-| `notebook-developer` | Kaggle/Colabノートブック開発 |
-
-### 使い方
-- チーム起動: `TeamCreate` → `TaskCreate` → `Task`（teammate spawn）
-- 詳細: `.claude/skills/teams/` を参照
+エージェント一覧・チームパターン・ライフサイクル・ファイル所有権ルールは `.claude/skills/teams/SKILL.md` を参照。
 
 ## File Structure
 

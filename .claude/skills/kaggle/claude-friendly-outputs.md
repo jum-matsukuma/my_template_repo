@@ -100,7 +100,7 @@ class ExperimentReporter:
         return report_path
 
 # Usage in Colab
-reporter = ExperimentReporter('/content/drive/MyDrive/kaggle/cafa-6/outputs/reports')
+reporter = ExperimentReporter('/content/drive/MyDrive/kaggle/my-competition/outputs/reports')
 report = reporter.create_report(
     experiment_name="baseline_v1",
     metrics={"val_f1": 0.875, "val_auc": 0.923, "train_time_sec": 145.2},
@@ -210,7 +210,7 @@ class PlotSaver:
         return filepath
 
 # Usage
-plotter = PlotSaver('/content/drive/MyDrive/kaggle/cafa-6/outputs/plots')
+plotter = PlotSaver('/content/drive/MyDrive/kaggle/my-competition/outputs/plots')
 
 # Feature importance plot
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -246,7 +246,7 @@ def log_experiment(log_file, experiment_data):
 
 # Usage
 log_experiment(
-    '/content/drive/MyDrive/kaggle/cafa-6/outputs/experiments.jsonl',
+    '/content/drive/MyDrive/kaggle/my-competition/outputs/experiments.jsonl',
     {
         'experiment_id': 'baseline_v1',
         'config': {'model': 'lgbm', 'n_estimators': 1000},
@@ -283,7 +283,7 @@ class TeeLogger:
         self.log.flush()
 
 # Usage in Colab
-sys.stdout = TeeLogger('/content/drive/MyDrive/kaggle/cafa-6/outputs/logs/training.log')
+sys.stdout = TeeLogger('/content/drive/MyDrive/kaggle/my-competition/outputs/logs/training.log')
 
 print("Starting training...")
 model.fit(X_train, y_train)
@@ -357,7 +357,7 @@ def create_data_summary(df, output_path):
 # Usage
 create_data_summary(
     train_df,
-    '/content/drive/MyDrive/kaggle/cafa-6/outputs/reports/data_summary.md'
+    '/content/drive/MyDrive/kaggle/my-competition/outputs/reports/data_summary.md'
 )
 ```
 
@@ -443,7 +443,7 @@ class ReportWatcher(FileSystemEventHandler):
 observer = Observer()
 observer.schedule(
     ReportWatcher(),
-    path='~/GoogleDrive/kaggle/cafa-6/outputs/reports',
+    path='~/GoogleDrive/kaggle/my-competition/outputs/reports',
     recursive=False
 )
 observer.start()
@@ -493,7 +493,7 @@ from pathlib import Path
 from datetime import datetime
 
 # Setup paths
-DRIVE_BASE = Path('/content/drive/MyDrive/kaggle/cafa-6')
+DRIVE_BASE = Path('/content/drive/MyDrive/kaggle/my-competition')
 OUTPUT_DIR = DRIVE_BASE / 'outputs'
 REPORTS_DIR = OUTPUT_DIR / 'reports'
 PLOTS_DIR = OUTPUT_DIR / 'plots'
@@ -533,7 +533,7 @@ print("📁 Open in Claude Code to review results")
 
 ```bash
 # After Google Drive syncs
-cd ~/GoogleDrive/kaggle/cafa-6/outputs/reports
+cd ~/GoogleDrive/kaggle/my-competition/outputs/reports
 
 # Claude can read the latest report
 cat experiment_baseline_v1_20240115.md
