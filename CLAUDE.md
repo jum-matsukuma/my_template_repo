@@ -151,6 +151,12 @@ SKILL.mdでの参照例:
 
 エージェント一覧・チームパターン・ライフサイクル・ファイル所有権ルールは `.claude/skills/teams/SKILL.md` を参照。
 
+## Codex CLI Integration (Optional)
+
+`.claude/agents/codex-reviewer.md`、`.claude/commands/codex-review.md`、および `.claude/.mcp.json` の `codex` エントリで OpenAI Codex CLI をセカンドオピニオン用レビュワーとして呼び出せる。共有ラッパは `.claude/scripts/codex-run.sh`(`-s read-only` 固定、`CLAUDE_CODEX_MAX_DEPTH`/`CLAUDE_CODEX_TIMEOUT` で挙動調整)。
+
+setup・3 経路の使い分け・安全モデル・チューニング項目は `README.md` の "Codex CLI Integration (Optional Reviewer)" セクションを参照。MCP 経路は **opt-in** — `settings.local.json` の `enabledMcpjsonServers` に `"codex"` を追加して有効化。
+
 ## File Structure
 
 ```
