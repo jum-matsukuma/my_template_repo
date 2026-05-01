@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 # Wrapper for invoking the Codex CLI from Claude Code with safety guardrails.
 #
-# Usage: codex-run.sh <codex-args...>
+# Usage: codex-run.sh exec [codex-args...]
 # Examples:
-#   codex-run.sh exec -s read-only "review this snippet: ..."
-#   codex-run.sh exec -s read-only review --base main
+#   codex-run.sh exec "review this snippet: ..."
+#   codex-run.sh exec review --base main
+#
+# Reviewer-role contract enforced here:
+#   - Only `codex exec` is permitted; other subcommands (apply, sandbox,
+#     mcp-server, login, …) are rejected. They reach more permissive
+#     behavior than the reviewer role allows.
+#   - `-s read-only` is forced; any caller-supplied -s/--sandbox is stripped
+#     before our flag is inserted (clap rejects duplicates).
+#   - `--dangerously-bypass-approvals-and-sandbox` is rejected.
+#   - `-c sandbox_permissions=...` style config overrides are not filtered
+#     (advanced bypass; out of scope for this wrapper).
+#   For codex diagnostics like `codex --version`, call codex directly via
+#   the separately allow-listed `Bash(codex --version)` permission.
 #
 # Environment:
 #   CLAUDE_CODEX_DEPTH        Current call depth (incremented on each call). Default: 0.
@@ -27,6 +39,41 @@ if [ "$MAX" -gt 0 ] && [ "$DEPTH" -ge "$MAX" ]; then
   echo "Codex depth limit (CLAUDE_CODEX_MAX_DEPTH=$MAX) reached at depth $DEPTH." >&2
   exit 1
 fi
+
+if [ "${1:-}" != "exec" ]; then
+  echo "codex-run.sh: only 'codex exec' is permitted via this wrapper (got: '${1:-<empty>}')." >&2
+  echo "  This wrapper enforces the reviewer role (read-only sandbox)." >&2
+  echo "  For codex diagnostics, run 'codex --version' directly." >&2
+  exit 2
+fi
+shift
+
+# Strip caller-supplied -s/--sandbox; reject the sandbox-bypass flag.
+filtered=()
+skip=0
+for arg in "$@"; do
+  if [ "$skip" -eq 1 ]; then
+    skip=0
+    continue
+  fi
+  case "$arg" in
+    --dangerously-bypass-approvals-and-sandbox)
+      echo "codex-run.sh: refusing --dangerously-bypass-approvals-and-sandbox." >&2
+      exit 2
+      ;;
+    -s|--sandbox)
+      skip=1
+      ;;
+    -s=*|--sandbox=*)
+      ;;
+    *)
+      filtered+=("$arg")
+      ;;
+  esac
+done
+
+# Reassemble: codex exec -s read-only <filtered>
+set -- exec -s read-only ${filtered[@]+"${filtered[@]}"}
 
 export CLAUDE_CODEX_DEPTH=$((DEPTH + 1))
 

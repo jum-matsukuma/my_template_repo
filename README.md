@@ -57,9 +57,15 @@ Three opt-in routes let you call OpenAI's Codex CLI from inside a Claude Code se
 
 ### Safety model
 
-- **Read-only sandbox** is fixed on every `codex exec` invocation from the agent and slash command (`-s read-only`). Codex cannot modify files through these routes.
-- **Autonomous-friendly**: there is no hard recursion limit by default. Set `CLAUDE_CODEX_MAX_DEPTH=N` to opt into a depth ceiling for a session.
+The wrapper `.claude/scripts/codex-run.sh` enforces the reviewer-role contract structurally — not just by convention:
+
+- **Subcommand whitelist** — only `codex exec` is permitted; `apply`, `sandbox`, `mcp-server`, `login`, etc. are rejected with exit 2.
+- **`-s read-only` is forced** — any caller-supplied `-s`/`--sandbox` is stripped before our flag is inserted, so a Claude session cannot run `codex exec -s workspace-write` through the wrapper.
+- **`--dangerously-bypass-approvals-and-sandbox` is rejected** — the wrapper exits 2 if it sees this flag.
+- **Autonomous-friendly recursion** — no hard depth limit by default. Set `CLAUDE_CODEX_MAX_DEPTH=N` to opt into a ceiling for a session.
 - **Per-call timeout** defaults to 30 minutes. Set `CLAUDE_CODEX_TIMEOUT=<seconds>` to override, or `0` to disable.
+
+The MCP route does not flow through this wrapper; it runs `codex mcp-server` directly. Sandbox enforcement for that route depends on Codex's own configuration (`~/.codex/config.toml`).
 
 Pro plan users running deep autonomous workflows often want `CLAUDE_CODEX_TIMEOUT=0` (or a high value like `7200`).
 
