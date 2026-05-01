@@ -7,6 +7,14 @@
       "env": {
         "NODE_ENV": "development"
       }
+    },
+    "codex": {
+      "_comment": "OpenAI Codex CLI as MCP server. Requires `npm i -g @openai/codex` and `codex login`. Disabled by default — to enable, add \"codex\" to enabledMcpjsonServers in settings.local.json. See README.",
+      "command": "codex",
+      "args": ["mcp"],
+      "env": {
+        "CLAUDE_CODEX_DEPTH": "1"
+      }
     }
   }
 }
