@@ -32,9 +32,7 @@
       "Bash(git merge-file *)",
       "Bash(git rev-list *)",
       "Bash(bash .claude/scripts/codex-run.sh:*)",
-      "Bash(codex exec:*)",
       "Bash(codex --version)",
-      "Bash(timeout:*)",
       "WebFetch(domain:github.com)"
     ]
   },

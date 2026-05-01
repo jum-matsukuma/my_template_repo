@@ -80,7 +80,7 @@ If you don't want this in your derived project, delete:
 - `.claude/commands/codex-review.md`
 - `.claude/scripts/codex-run.sh`
 - The `codex` entry in `.claude/.mcp.json`
-- The four `codex`/`timeout` lines from `.claude/settings.json` `permissions.allow`
+- The two `codex` lines from `.claude/settings.json` `permissions.allow` (the wrapper allow-list and `codex --version`)
 - This README section
 
 ## Kaggle Competition Development
