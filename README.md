@@ -33,6 +33,62 @@ This template is designed to be copied for new projects, providing:
 - Specialized AI assistance for common development tasks
 - Ready-to-use configurations for popular technology stacks
 
+## Codex CLI Integration (Optional Reviewer)
+
+Three opt-in routes let you call OpenAI's Codex CLI from inside a Claude Code session as a second-opinion reviewer:
+
+| Route | How to invoke | When to use |
+|-------|---------------|-------------|
+| Agent (`codex-reviewer`) | Ask Claude in natural language: "have Codex review this" | Flexible / ad-hoc reviews |
+| Slash command (`/codex-review`) | `/codex-review [--base BRANCH \| --uncommitted \| --commit SHA]` | One-shot branch-diff review |
+| MCP server (`codex`) | Opt-in (see below); Claude calls Codex tools autonomously | Persistent / autonomous use |
+
+### Setup
+
+1. Install Codex CLI: `npm install -g @openai/codex`
+2. Authenticate: `codex login`
+3. (MCP route only) Add `"codex"` to `enabledMcpjsonServers` in your `.claude/settings.local.json`:
+
+   ```json
+   {
+     "enabledMcpjsonServers": ["filesystem", "codex"]
+   }
+   ```
+
+### Safety model
+
+The wrapper `.claude/scripts/codex-run.sh` enforces the reviewer-role contract structurally — not just by convention:
+
+- **Subcommand whitelist** — only `codex exec` is permitted; `apply`, `sandbox`, `mcp-server`, `login`, etc. are rejected with exit 2.
+- **`-s read-only` is forced** — any caller-supplied `-s`/`--sandbox` is stripped before our flag is inserted, so a Claude session cannot run `codex exec -s workspace-write` through the wrapper.
+- **`--dangerously-bypass-approvals-and-sandbox` is rejected** — the wrapper exits 2 if it sees this flag.
+- **Autonomous-friendly recursion** — no hard depth limit by default. Set `CLAUDE_CODEX_MAX_DEPTH=N` to opt into a ceiling for a session.
+- **Per-call timeout** defaults to 30 minutes. Set `CLAUDE_CODEX_TIMEOUT=<seconds>` to override, or `0` to disable.
+
+The MCP route does not flow through this wrapper; it runs `codex mcp-server` directly. Sandbox enforcement for that route depends on Codex's own configuration (`~/.codex/config.toml`).
+
+Pro plan users running deep autonomous workflows often want `CLAUDE_CODEX_TIMEOUT=0` (or a high value like `7200`).
+
+### Tuning
+
+| Env var | Default | Purpose |
+|---------|---------|---------|
+| `CLAUDE_CODEX_DEPTH` | `0` | Auto-incremented; observability only |
+| `CLAUDE_CODEX_MAX_DEPTH` | `0` (unlimited) | Opt-in recursion ceiling |
+| `CLAUDE_CODEX_TIMEOUT` | `1800` (30 min) | Per-call timeout in seconds; `0` disables |
+
+On macOS without GNU coreutils, `codex-run.sh` falls back to a Perl `alarm` for timeout enforcement (exit code `142` instead of GNU `timeout`'s `124`).
+
+### Removing the integration
+
+If you don't want this in your derived project, delete:
+- `.claude/agents/codex-reviewer.md`
+- `.claude/commands/codex-review.md`
+- `.claude/scripts/codex-run.sh`
+- The `codex` entry in `.claude/.mcp.json`
+- The two `codex` lines from `.claude/settings.json` `permissions.allow` (the wrapper allow-list and `codex --version`)
+- This README section
+
 ## Kaggle Competition Development
 
 This template includes a complete workflow for Kaggle competitions with Claude Code, Google Colab, and Google Drive integration.
