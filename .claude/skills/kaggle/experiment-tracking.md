@@ -129,11 +129,11 @@ docs/archive/<competition-name>/
 **SKILL.md に残す**: 現在のベスト、Next Steps、直近の重要情報
 **アーカイブ**: 実装済みテクニック詳細、古い分析、不採用アプローチ詳細
 
-## 担当エージェントとの連携
+## 更新フロー（3層ファイルの運用）
 
-| 操作 | 担当エージェント |
-|------|----------------|
-| EXPERIMENT_LOG.md への記録 | experiment-engineer |
-| COMPETITION_TRACKER.md の更新 | data-analyst |
-| SKILL.md の更新 | team-lead（または手動） |
-| 全体の分析・仮説生成 | data-analyst |
+| 操作 | タイミング |
+|------|-----------|
+| EXPERIMENT_LOG.md への記録 | 実験を1本回すたびに追記（スコア・delta・教訓） |
+| COMPETITION_TRACKER.md の更新 | リーダーボード/公開ノートブックを確認したとき置換更新 |
+| SKILL.md の更新 | ベストパラメータ・Next Steps が変わったとき置換更新 |
+| 全体の分析・仮説生成 | サイクルの区切りで EXPERIMENT_LOG を読み返してパターン抽出 |
