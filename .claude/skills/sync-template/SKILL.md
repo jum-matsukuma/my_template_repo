@@ -140,7 +140,7 @@ Commits since last sync (<lastSyncDate>):
 | File | Status | Action |
 |------|--------|--------|
 | .claude/skills/new/SKILL.md | New file | Auto-apply |
-| .claude/agents/team-lead.md | Template only | Auto-apply |
+| .claude/agents/code-reviewer.md | Template only | Auto-apply |
 | CLAUDE.md | Protected | Skip (show diff) |
 | .claude/settings.json | Both modified | Manual review needed |
 ```

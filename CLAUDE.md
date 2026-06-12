@@ -34,12 +34,10 @@
 
 | 種別 | 削除対象 |
 |------|---------|
-| `web` | `kaggle-template/`, `.claude/agents/experiment-engineer.md`, `.claude/agents/data-analyst.md`, `.claude/agents/notebook-developer.md`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
-| `frontend` | 上記 + `.claude/agents/backend-dev.md` |
-| `backend` | 上記（`kaggle-template/`等） + `.claude/agents/frontend-dev.md` |
-| `kaggle` | `.claude/agents/frontend-dev.md`, `.claude/agents/backend-dev.md` |
-| `python` | `kaggle-template/`, `.claude/agents/frontend-dev.md`, `.claude/agents/backend-dev.md`, `.claude/agents/experiment-engineer.md`, `.claude/agents/data-analyst.md`, `.claude/agents/notebook-developer.md`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
-| `node` | `kaggle-template/`, `pyproject.toml`, `.claude/agents/experiment-engineer.md`, `.claude/agents/data-analyst.md`, `.claude/agents/notebook-developer.md`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
+| `web` / `frontend` / `backend` | `kaggle-template/`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
+| `kaggle` | （Kaggle 関連は全て残す。削除対象なし） |
+| `python` | `kaggle-template/`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
+| `node` | `kaggle-template/`, `pyproject.toml`, `.claude/skills/kaggle/`, `.claude/commands/kaggle-update.md` |
 
 **注意**: 削除前にファイル一覧をユーザーに提示し、確認を取ること。
 
@@ -143,11 +141,15 @@ SKILL.mdでの参照例:
 - [topic-b-workflow.md](topic-b-workflow.md) - トピックBのワークフロー
 ```
 
-## Agent Teams (Experimental)
+## Custom Agents
 
-マルチエージェント協調ワークフロー機能。`.claude/settings.json` で `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"` を設定済み。
+`.claude/agents/` に補助エージェントを定義済み。いずれも単体での委譲用途で、チーム協調を前提としない。
 
-エージェント一覧・チームパターン・ライフサイクル・ファイル所有権ルールは `.claude/skills/teams/SKILL.md` を参照。
+| エージェント | 用途 |
+|---|---|
+| `code-reviewer` | 変更コードの独立レビュー |
+| `codex-reviewer` | OpenAI Codex CLI によるセカンドオピニオン |
+| `tech-innovation-advisor` | 技術戦略・アーキテクチャ助言 |
 
 ## Codex CLI Integration (Optional)
 
@@ -164,24 +166,15 @@ project-root/
 ├── CLAUDE.md           # This file
 ├── .claude/            # Claude Code configurations
 │   ├── agents/         # Custom agent definitions
-│   │   ├── team-lead.md
-│   │   ├── frontend-dev.md
-│   │   ├── backend-dev.md
-│   │   ├── qa-tester.md
 │   │   ├── code-reviewer.md
-│   │   ├── tech-innovation-advisor.md
-│   │   ├── experiment-engineer.md
-│   │   ├── data-analyst.md
-│   │   └── notebook-developer.md
+│   │   ├── codex-reviewer.md
+│   │   └── tech-innovation-advisor.md
 │   └── skills/         # Skills directory (Claude Code recommended format)
 │       ├── kaggle/     # Kaggle competition skills
 │       │   └── SKILL.md
 │       ├── development/# Core development skills
 │       │   └── SKILL.md
-│       ├── teams/      # Agent Teams guide
-│       │   └── SKILL.md
-│       └── templates/  # Skill templates
-│           └── SKILL.md
+│       └── templates/  # Skill templates (technology-stack, custom-tools, project-domain)
 ├── kaggle-template/    # Kaggle competition template
 └── README.md           # Project overview
 ```
