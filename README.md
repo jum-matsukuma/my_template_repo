@@ -6,7 +6,7 @@ A comprehensive template repository for individual software development projects
 
 - **CLAUDE.md**: Comprehensive guidance for Claude Code integration
 - **.claude/skills/**: Technical capabilities and development skills reference
-- **Custom Agents**: Reviewer and advisory agent definitions for delegation (`.claude/agents/`)
+- **Custom Agents**: Reviewer agent definitions for delegation (`.claude/agents/`)
 - **Development Settings**: Optimized configurations for various languages and tools
 
 ## Quick Start
@@ -19,9 +19,9 @@ A comprehensive template repository for individual software development projects
 
 - `CLAUDE.md` - Main guidance file for Claude Code (< 60 lines, following Anthropic best practices)
 - `.claude/skills/` - Structured technical capabilities and domain knowledge (Claude Code recommended format)
-- `.claude/agents/` - Custom agent definitions (code-reviewer, codex-reviewer, tech-innovation-advisor)
+- `.claude/agents/` - Custom agent definitions (code-reviewer, codex-reviewer)
 - `.claude/commands/` - Custom slash commands for common tasks
-- `.claude/hooks/` - Automation hooks for git and development workflow
+- `.claude/hooks/` - Claude Code hooks (completion notification, auto-format, PR review nudge)
 - `.claude/settings.json` - Development environment settings
 - `.claude/.mcp.json` - Model Context Protocol server configuration
 
@@ -32,6 +32,25 @@ This template is designed to be copied for new projects, providing:
 - Quality assurance through automated tools
 - Specialized AI assistance for common development tasks
 - Ready-to-use configurations for popular technology stacks
+
+## Automated Review Flow (Local, no CI)
+
+PR 前レビューは CI ではなくセッション内で完結する（クォータを消費するのは使うと決めたときだけ）:
+
+1. **`/pr`** — コミット後にビルトイン `/code-review` を実行し、Codex CLI があれば `codex-reviewer` の第二意見も並列取得。confirmed な指摘を修正してから push / PR 作成。`--skip-review` でスキップ可。
+2. **レビューナッジ hook** — `/pr` を経由せず `gh pr create` を直接実行した場合も、ブランチごと初回のみレビュー実施を確認する（同じコマンドの再実行で通る。ハードゲートではない）。
+
+## Hooks
+
+`.claude/settings.json` で3つのフックがデフォルト有効。いずれも依存ツールが無ければ無音でスキップする:
+
+| Hook | Event | Behavior |
+|------|-------|----------|
+| `notify.sh` | Stop | タスク完了のOS通知（terminal-notifier / osascript / notify-send） |
+| `format.sh` | PostToolUse (Edit\|Write) | 編集ファイルのみ自動フォーマット（`.py`→ruff、js/ts等→prettier 設定がある場合のみ） |
+| `pr-review-nudge.sh` | PreToolUse (Bash) | `gh pr create` 前の一度きりレビューナッジ |
+
+無効化: `settings.json` の `hooks` から該当エントリを削除。
 
 ## Codex CLI Integration (Optional Reviewer)
 
@@ -51,7 +70,7 @@ Three opt-in routes let you call OpenAI's Codex CLI from inside a Claude Code se
 
    ```json
    {
-     "enabledMcpjsonServers": ["filesystem", "codex"]
+     "enabledMcpjsonServers": ["codex"]
    }
    ```
 
@@ -157,16 +176,9 @@ outputs/reports/の最新実験レポート3件を比較して、
 
 **Code review:**
 ```
-/review
+/code-review
 
-src/models.pyをレビューしてください。
-データリーク、メモリ効率、再現性の観点でチェックしてください。
-```
-
-**Strategic advice:**
-```
-tech-innovation-advisorエージェントを使って、
-スコア停滞時の打開策を提案してください。
+データリーク、メモリ効率、再現性の観点を重点的にチェックしてください。
 ```
 
 ### Documentation
@@ -187,4 +199,4 @@ tech-innovation-advisorエージェントを使って、
 - **Claude-Friendly Reports**: Markdown with embedded images for AI review
 - **Minimal Colab Code**: All logic in GitHub modules, Colab only calls functions
 - **Automatic Sync**: Google Drive Desktop syncs Colab outputs locally
-- **Custom Agents**: code-reviewer and tech-innovation-advisor for specialized tasks
+- **Custom Agents**: code-reviewer and codex-reviewer for independent review passes
