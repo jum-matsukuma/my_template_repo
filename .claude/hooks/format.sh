@@ -22,7 +22,7 @@ case "$FILE" in
         ;;
     *.js | *.jsx | *.ts | *.tsx | *.json | *.css | *.md)
         # Only when the project opted into prettier (avoid imposing style)
-        if ls .prettierrc* prettier.config.* > /dev/null 2>&1; then
+        if compgen -G ".prettierrc*" > /dev/null 2>&1 || compgen -G "prettier.config.*" > /dev/null 2>&1; then
             npx --no-install prettier --write "$FILE" > /dev/null 2>&1
         fi
         ;;

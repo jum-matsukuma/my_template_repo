@@ -153,6 +153,8 @@ SKILL.mdでの参照例:
 | `format.sh` | PostToolUse (Edit\|Write) | 編集したファイルだけ自動フォーマット（`.py`→ruff、js/ts等→prettier 設定がある場合のみ） |
 | `pr-review-nudge.sh` | PreToolUse (Bash) | `gh pr create` 前にブランチごと1回だけレビュー実施を確認（再実行で通る） |
 
+format.sh と pr-review-nudge.sh は入力の解析に `jq` を使う（無ければ両フックは無音でスキップされる）。
+
 無効化する場合は `settings.json` の `hooks` から該当エントリを削除する。
 
 ## Custom Agents
