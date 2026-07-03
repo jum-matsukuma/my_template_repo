@@ -10,24 +10,24 @@
       "Bash(npm run typecheck)",
       "Bash(npm run dev)",
       "Bash(git status)",
-      "Bash(git diff *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(git log *)",
-      "Bash(git checkout *)",
-      "Bash(git branch *)",
-      "Bash(uv sync *)",
-      "Bash(uv run python -m pytest *)",
-      "Bash(uv run python -m ruff *)",
-      "Bash(uv run python -m black *)",
-      "Bash(uv run python -m mypy *)",
-      "Bash(gh pr *)",
-      "Bash(gh api *)",
-      "Bash(git fetch *)",
-      "Bash(git remote *)",
-      "Bash(git show *)",
-      "Bash(git merge-file *)",
-      "Bash(git rev-list *)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git log:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git remote:*)",
+      "Bash(git show:*)",
+      "Bash(git merge-file:*)",
+      "Bash(git rev-list:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv run python -m pytest:*)",
+      "Bash(uv run python -m ruff:*)",
+      "Bash(uv run python -m black:*)",
+      "Bash(uv run python -m mypy:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh api:*)",
       "Bash(bash .claude/scripts/codex-run.sh:*)",
       "Bash(codex --version)",
       "WebFetch(domain:github.com)"
@@ -36,5 +36,30 @@
   "statusLine": {
     "type": "command",
     "command": ".claude/statusline.sh"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/pr-review-nudge.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/format.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/notify.sh" }
+        ]
+      }
+    ]
   }
 }

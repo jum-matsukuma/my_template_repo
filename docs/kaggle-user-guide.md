@@ -420,7 +420,7 @@ outputs/reports/experiment_age_fare_20260117.mdをレビューしてください
 
 **Claude Codeへの指示例:**
 ```
-/review
+/code-review
 
 src/models.pyを中心にコードレビューをお願いします。
 特に以下の点をチェックしてください：
@@ -434,7 +434,6 @@ src/models.pyを中心にコードレビューをお願いします。
 **Claude Codeへの指示例:**
 ```
 現在のスコアが伸び悩んでいます（0.765 → 0.766で停滞）。
-tech-innovation-advisorエージェントを使って、
 以下について戦略的なアドバイスをください：
 
 1. 特徴量エンジニアリングの次の方向性
@@ -459,7 +458,7 @@ tech-innovation-advisorエージェントを使って、
 
 **指示例:**
 ```
-/review
+/code-review
 
 src/models.pyとsrc/features.pyを中心にレビューしてください。
 Kaggleコンペの観点から、以下も確認してください：
@@ -468,7 +467,9 @@ Kaggleコンペの観点から、以下も確認してください：
 - 再現性の確保
 ```
 
-### tech-innovation-advisorエージェント
+### 戦略的な技術相談
+
+エージェントを介さず、Claudeに直接自然な言葉で相談すれば十分です。
 
 **使用タイミング:**
 - スコア停滞時の打開策検討
@@ -477,8 +478,7 @@ Kaggleコンペの観点から、以下も確認してください：
 
 **指示例:**
 ```
-Task toolでtech-innovation-advisorを起動して、
-以下について技術的なアドバイスをください：
+スコア停滞時の打開策を提案して。
 
 TabNet、FT-Transformer、AutoGluonなどの
 テーブルデータ向けディープラーニング手法を
