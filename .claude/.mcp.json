@@ -7,6 +7,12 @@
       "env": {
         "CLAUDE_CODEX_DEPTH": "1"
       }
+    },
+    "colab": {
+      "_comment": "Google Colab MCP server — lets Claude drive a Colab notebook open in your browser. Requires `uv` and `git`. Disabled by default — to enable, add \"colab\" to enabledMcpjsonServers in settings.local.json. See .claude/skills/colab/colab-mcp.md.",
+      "command": "uvx",
+      "args": ["git+https://github.com/googlecolab/colab-mcp"],
+      "timeout": 30000
     }
   }
 }

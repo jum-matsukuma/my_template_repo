@@ -110,6 +110,24 @@ If you don't want this in your derived project, delete:
 - The two `codex` lines from `.claude/settings.json` `permissions.allow` (the wrapper allow-list and `codex --version`)
 - This README section
 
+## Google Colab Integration (Optional)
+
+`.claude/skills/colab/` に Google 公式の Colab 連携 2 経路をまとめてある。Claude が「Colab で実行して」系の依頼で自動的に参照する:
+
+| Route | What it does | Setup |
+|-------|--------------|-------|
+| **Colab CLI**（推奨） | ターミナルから GPU/TPU ランタイムを確保しスクリプトをヘッドレス実行（`colab run` / `colab exec`）。成果物は `colab download` で回収 | `uv tool install google-colab-cli` + gcloud ADC 認証（[SKILL.md](.claude/skills/colab/SKILL.md) 参照）。macOS / Linux のみ |
+| **Colab MCP**（opt-in） | ブラウザで開いている Colab ノートブックのセルを Claude がライブ作成・実行 | `settings.local.json` の `enabledMcpjsonServers` に `"colab"` を追加（[colab-mcp.md](.claude/skills/colab/colab-mcp.md) 参照） |
+
+CLI の完全リファレンスは [colab-operator.md](.claude/skills/colab/colab-operator.md)（Google 公式 colab-operator スキルの vendored コピー、Apache-2.0）。CLI 導入後は `colab skill` で常に最新版を取得できる。
+
+### Removing the integration
+
+If you don't want this in your derived project, delete:
+- `.claude/skills/colab/`
+- The `colab` entry in `.claude/.mcp.json`
+- This README section
+
 ## Kaggle Competition Development
 
 This template includes a complete workflow for Kaggle competitions with Claude Code, Google Colab, and Google Drive integration.
@@ -189,7 +207,8 @@ outputs/reports/の最新実験レポート3件を比較して、
 - **[Kaggle User Guide](docs/kaggle-user-guide.md)** - Complete development workflow with instruction examples
 
 **Technical Documentation:**
-- **[colab-workflow.md](.claude/skills/kaggle/colab-workflow.md)** - Colab + Claude Code integration setup
+- **[colab skill](.claude/skills/colab/SKILL.md)** - Colab CLI / MCP execution (GPU/TPU headless runs, live notebook control)
+- **[colab-workflow.md](.claude/skills/kaggle/colab-workflow.md)** - Drive structure & checkpointing for Colab workflows
 - **[data-analysis-workflow.md](.claude/skills/kaggle/data-analysis-workflow.md)** - Step-by-step data analysis process
 - **[claude-friendly-outputs.md](.claude/skills/kaggle/claude-friendly-outputs.md)** - Creating outputs for Claude review
 - **[kaggle-api-setup.md](.claude/skills/kaggle/kaggle-api-setup.md)** - Kaggle CLI reference
