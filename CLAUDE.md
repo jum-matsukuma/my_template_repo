@@ -117,6 +117,8 @@ Kaggle CLI のセットアップと全コマンドリファレンスは `.claude
 - Run typecheck after making code changes
 - Write tests for new functionality
 - Use conventional commit messages
+- PR作成は `/pr` を使う — コミット後にビルトイン `/code-review`（+ Codex があれば第二意見）を実行し、修正してから PR を作成する。`--skip-review` でスキップ可
+- `gh pr create` を直接実行した場合も、ブランチごと初回のみ hooks がレビュー実施を確認する（再実行で通る）
 - Prefer composition over inheritance
 
 ### Skills File Management
@@ -141,6 +143,18 @@ SKILL.mdでの参照例:
 - [topic-b-workflow.md](topic-b-workflow.md) - トピックBのワークフロー
 ```
 
+## Hooks
+
+`.claude/settings.json` で3つのフックがデフォルト有効。いずれも依存ツールが無ければ無音でスキップし、処理をブロックしない:
+
+| フック | イベント | 動作 |
+|---|---|---|
+| `notify.sh` | Stop | タスク完了をOS通知（terminal-notifier / osascript / notify-send） |
+| `format.sh` | PostToolUse (Edit\|Write) | 編集したファイルだけ自動フォーマット（`.py`→ruff、js/ts等→prettier 設定がある場合のみ） |
+| `pr-review-nudge.sh` | PreToolUse (Bash) | `gh pr create` 前にブランチごと1回だけレビュー実施を確認（再実行で通る） |
+
+無効化する場合は `settings.json` の `hooks` から該当エントリを削除する。
+
 ## Custom Agents
 
 `.claude/agents/` に補助エージェントを定義済み。いずれも単体での委譲用途で、チーム協調を前提としない。
@@ -149,7 +163,6 @@ SKILL.mdでの参照例:
 |---|---|
 | `code-reviewer` | 変更コードの独立レビュー |
 | `codex-reviewer` | OpenAI Codex CLI によるセカンドオピニオン |
-| `tech-innovation-advisor` | 技術戦略・アーキテクチャ助言 |
 
 ## Codex CLI Integration (Optional)
 
@@ -167,12 +180,11 @@ project-root/
 ├── .claude/            # Claude Code configurations
 │   ├── agents/         # Custom agent definitions
 │   │   ├── code-reviewer.md
-│   │   ├── codex-reviewer.md
-│   │   └── tech-innovation-advisor.md
+│   │   └── codex-reviewer.md
+│   ├── commands/       # Slash commands (/pr, /codex-review, /docs, /test, ...)
+│   ├── hooks/          # notify.sh / format.sh / pr-review-nudge.sh
 │   └── skills/         # Skills directory (Claude Code recommended format)
 │       ├── kaggle/     # Kaggle competition skills
-│       │   └── SKILL.md
-│       ├── development/# Core development skills
 │       │   └── SKILL.md
 │       └── templates/  # Skill templates (technology-stack, custom-tools, project-domain)
 ├── kaggle-template/    # Kaggle competition template
@@ -189,27 +201,12 @@ project-root/
 
 ### Kaggle Competition Development
 
-**Standard Setup (Local execution):**
+`kaggle-template/` をコピーして開始する:
+
 ```bash
 cp -r kaggle-template/ my-competition/
 cd my-competition/
 uv sync --extra kaggle
 ```
 
-**Google Colab Setup (Cloud execution with GPU):**
-For competitions requiring large datasets or GPU/TPU resources:
-- Develop code locally with Claude Code
-- Store data in Google Drive
-- Execute training on Google Colab
-- See `.claude/skills/kaggle/colab-workflow.md` for complete setup guide
-- Use `kaggle-template/colab_template.ipynb` as starting point
-
-The template includes specialized notebooks, directory structure, and Kaggle-specific skills at `.claude/skills/kaggle/`.
-
-**Experiment Tracking (3-tier structure):**
-Kaggleコンペでは3層のファイルで知見を管理:
-- `SKILL.md` — 現在のベストパラメータ・ワークフロー・Next Steps（置換更新）
-- `EXPERIMENT_LOG.md` — 全実験結果の履歴（追記型）
-- `COMPETITION_TRACKER.md` — リーダーボード・公開ノートブック分析（置換更新）
-
-詳細: `.claude/skills/kaggle/experiment-tracking.md`
+セットアップ・Colab連携（GPU実行）・実験トラッキング（SKILL.md / EXPERIMENT_LOG.md / COMPETITION_TRACKER.md の3層構造）の詳細は `.claude/skills/kaggle/SKILL.md` とその支援ファイルを参照。
