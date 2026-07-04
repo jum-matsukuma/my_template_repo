@@ -2,11 +2,11 @@
 
 Google 公式の [colab-mcp](https://github.com/googlecolab/colab-mcp)（Apache-2.0）は、**ブラウザで開いている Colab ノートブック**を Claude Code からライブ操作するための MCP サーバー。セルの作成・編集・実行、markdown による説明の挿入、pip での依存インストールなどをノートブック上で直接行える。
 
-CLI（[colab-operator.md](colab-operator.md)）がヘッドレスなスクリプト実行向けなのに対し、MCP は「ノートブックそのものを対話的に育てる」用途向け。
+CLI（[colab-operator.md](colab-operator.md)）がヘッドレスなスクリプト実行向けなのに対し、MCP は「ブラウザのノートブックそのものを対話的に育てる」用途向け。使い分けの基準は [SKILL.md](SKILL.md) のルーティング表が正とする（CLI で学習を回し、結果の可視化・レポート化だけ MCP で行う併用も可）。
 
 ## 有効化（opt-in）
 
-`.claude/.mcp.json` に `colab` エントリが定義済みだが、**デフォルト無効**。有効化するには `.claude/settings.local.json` の `enabledMcpjsonServers` に `"colab"` を追加する:
+プロジェクトルートの `.mcp.json` に `colab` エントリが定義済みだが、**デフォルト無効**。有効化するには `.claude/settings.local.json` の `enabledMcpjsonServers` に `"colab"` を追加する:
 
 ```json
 {
@@ -18,11 +18,15 @@ CLI（[colab-operator.md](colab-operator.md)）がヘッドレスなスクリプ
 
 ### 前提条件
 
-- `uv` がインストール済みであること（サーバーは `uvx git+https://github.com/googlecolab/colab-mcp` で起動される）
+- `uv` がインストール済みであること（サーバーは `uvx git+https://github.com/googlecolab/colab-mcp@v1.0.2` で起動される。リリースタグに pin してあり、更新は `.mcp.json` の `@タグ` を意図的に上げる）
 - `git` がインストール済みであること
-- Claude Code は `notifications/tools/list_changed` に対応しているため、クライアント要件は満たしている
+- **注意**: PyPI の `colab-mcp` パッケージは**無関係の別プロジェクト**。必ず `git+https://github.com/googlecolab/colab-mcp@<tag>` 形式を使うこと
 
-非標準のパッケージインデックスを使っている環境では、`.mcp.json` の `args` に `--index https://pypi.org/simple` を追加する。
+非標準のパッケージインデックスを使っている環境では、`--index` を**パッケージ指定より前に**置く（後ろに置くと colab-mcp 側への引数と解釈される）:
+
+```json
+"args": ["--index", "https://pypi.org/simple", "git+https://github.com/googlecolab/colab-mcp@v1.0.2"]
+```
 
 ## 使い方
 
@@ -32,20 +36,8 @@ CLI（[colab-operator.md](colab-operator.md)）がヘッドレスなスクリプ
 
 公開されるツールの一覧はセッション内で確認できる（`/mcp` で接続状態とツールを表示）。
 
-## CLI との使い分け
-
-| やりたいこと | 使うもの |
-|---|---|
-| 学習スクリプトを GPU でヘッドレス実行し成果物を回収 | CLI（`colab run` / `colab exec`） |
-| バッチ処理・CI 的なワンショットジョブ | CLI（`colab run`、自動クリーンアップ） |
-| ブラウザのノートブックを見ながら対話的に分析を進める | MCP |
-| 共有・提出用ノートブックを整形しながら作る | MCP |
-| Kaggle 提出フローの一部として実行 | CLI（kaggle スキルと組み合わせ） |
-
-両者は排他ではない。例: CLI で学習を回し、結果の可視化・レポート化はブラウザのノートブックで MCP により行う。
-
 ## トラブルシューティング
 
-- **サーバーが起動しない**: `uv --version` で uv の存在を確認。初回は `uvx` が GitHub からパッケージを取得するためネットワークが必要
-- **起動が遅い / タイムアウト**: `.mcp.json` の `timeout: 30000` は初回取得の遅さを見込んだ値。それでも失敗する場合は一度シェルで `uvx git+https://github.com/googlecolab/colab-mcp --help` を実行してキャッシュを温める
+- **サーバーが起動しない**: `uv --version` で uv の存在を確認。初回は `uvx` が GitHub からパッケージを取得するためネットワークが必要（タグ pin により 2 回目以降はキャッシュされる）
+- **初回起動がタイムアウトする**: MCP サーバーの起動タイムアウトは環境変数 `MCP_TIMEOUT`（ms、デフォルト 30 秒）で制御される。初回フェッチが遅い環境では `MCP_TIMEOUT=120000 claude` で起動する。`.mcp.json` の `timeout` フィールドは**ツール実行**のタイムアウトであり起動には効かない（小さい値を設定すると長時間セル実行が打ち切られるため、このテンプレートでは未設定 = デフォルトのまま）
 - **ツールが見えない**: ブラウザ側でノートブックが開かれ、ランタイムに接続されているか確認。`/mcp` で colab サーバーの接続状態を確認

@@ -17,13 +17,13 @@ A comprehensive template repository for individual software development projects
 
 ## Files Overview
 
-- `CLAUDE.md` - Main guidance file for Claude Code (< 60 lines, following Anthropic best practices)
+- `CLAUDE.md` - Main guidance file for Claude Code (project rules, structure, integrations)
 - `.claude/skills/` - Structured technical capabilities and domain knowledge (Claude Code recommended format)
 - `.claude/agents/` - Custom agent definitions (code-reviewer, codex-reviewer)
 - `.claude/commands/` - Custom slash commands for common tasks
 - `.claude/hooks/` - Claude Code hooks (completion notification, auto-format, PR review nudge)
 - `.claude/settings.json` - Development environment settings
-- `.claude/.mcp.json` - Model Context Protocol server configuration
+- `.mcp.json` - Model Context Protocol server configuration (project root — Claude Code はこの場所のみ読む)
 
 ## Usage
 
@@ -106,7 +106,7 @@ If you don't want this in your derived project, delete:
 - `.claude/agents/codex-reviewer.md`
 - `.claude/commands/codex-review.md`
 - `.claude/scripts/codex-run.sh`
-- The `codex` entry in `.claude/.mcp.json`
+- The `codex` entry in `.mcp.json`
 - The two `codex` lines from `.claude/settings.json` `permissions.allow` (the wrapper allow-list and `codex --version`)
 - This README section
 
@@ -125,7 +125,9 @@ CLI の完全リファレンスは [colab-operator.md](.claude/skills/colab/cola
 
 If you don't want this in your derived project, delete:
 - `.claude/skills/colab/`
-- The `colab` entry in `.claude/.mcp.json`
+- The `colab` entry in `.mcp.json`
+- The "Google Colab Integration (Optional)" section and the `colab/` File Structure line in `CLAUDE.md`
+- The links to `../colab/SKILL.md` in `.claude/skills/kaggle/SKILL.md` (2 か所) and the banner in `.claude/skills/kaggle/colab-workflow.md`
 - This README section
 
 ## Kaggle Competition Development

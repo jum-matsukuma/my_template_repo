@@ -2,7 +2,7 @@
 
 Complete guide for Kaggle competition development using Claude Code locally with Google Colab for computation and Google Drive for data storage.
 
-> **実行手段について（2026-）**: このドキュメントの「git push → ブラウザで Colab を開いて手動実行」というフローは、公式 **Colab CLI**（ヘッドレス GPU/TPU 実行）と **Colab MCP**（ブラウザノートブックのライブ操作）で大部分を置き換えられる。まず [colab スキル](../colab/SKILL.md) を参照すること。本ドキュメントは Google Drive のデータ配置・チェックポイント戦略・トラブルシューティングの参考として引き続き有効。
+> **実行手段について**: このドキュメントの「git push → ブラウザで Colab を開いて手動実行」というフローは、公式 **Colab CLI**（ヘッドレス GPU/TPU 実行）と **Colab MCP**（ブラウザノートブックのライブ操作）で大部分を置き換えられる。まず [colab スキル](../colab/SKILL.md) を参照すること。本ドキュメントは Google Drive のデータ配置・チェックポイント戦略・トラブルシューティングの参考として引き続き有効。
 
 ## Architecture Overview
 
