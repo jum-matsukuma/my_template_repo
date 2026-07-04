@@ -1,6 +1,7 @@
 # Colab CLI Operator Reference (vendored)
 
 > **Source**: [googlecolab/google-colab-cli — `skills/colab-operator/SKILL.md`](https://github.com/googlecolab/google-colab-cli/blob/main/skills/colab-operator/SKILL.md) (Apache-2.0), vendored 2026-07 at upstream commit `0e22a02`.
+> **Known drift (verified 2026-07 against released CLI 0.6.0)**: the released CLI defaults to `--auth=oauth2`, not `adc` as the Authentication section below states (upstream main is ahead of the release). Always pass `colab --auth=adc <subcommand>` explicitly.
 > The installed CLI always carries the current version of this reference — if the CLI is installed, run `colab skill` and use that output **instead of** reading this file (don't load both). This copy is the offline fallback. To check for drift: `git log --oneline 0e22a02.. -- skills/colab-operator/SKILL.md` in the upstream repo, then re-vendor and update this header's commit.
 
 Operate Google Colab environments via the `colab` CLI: provision GPU/TPU sessions, run Python/shell on the VM, sync files, and capture work as notebooks.

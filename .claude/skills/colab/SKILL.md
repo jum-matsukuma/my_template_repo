@@ -28,25 +28,28 @@ gcloud auth application-default login \
   --scopes=openid,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/colaboratory
 
 # ワンショット実行: VM 確保 → 実行 → 自動破棄
-colab run --gpu T4 train.py --epochs 10
+# 注意: リリース版 CLI（0.6.0 で実機確認）のデフォルト認証は oauth2。
+# ADC を使うには --auth=adc を「サブコマンドの前に」毎回付けること。
+colab --auth=adc run --gpu T4 train.py --epochs 10
 
 # セッション型: カーネル状態が exec 間で持続する
-colab new -s exp1 --gpu T4
-colab exec -s exp1 -f setup_data.py
-colab exec -s exp1 -f train.py
-colab download -s exp1 /content/model.pt ./models/model.pt
-colab stop -s exp1   # 必ず停止（放置するとコンピュートユニットを消費し続ける）
+colab --auth=adc new -s exp1 --gpu T4
+colab --auth=adc exec -s exp1 -f setup_data.py
+colab --auth=adc exec -s exp1 -f train.py
+colab --auth=adc download -s exp1 /content/model.pt ./models/model.pt
+colab --auth=adc stop -s exp1   # 必ず停止（放置するとコンピュートユニットを消費し続ける）
 ```
 
 ## エージェント必須ルール
 
 作業前に完全リファレンスを一読すること — CLI インストール済みなら `colab skill` の出力、なければ [colab-operator.md](colab-operator.md)（vendored コピー、オフラインフォールバック）。**どちらか一方でよい**（両方読むと同内容を二重にロードする）。特に:
 
-1. **使い終わったら必ず `colab stop -s <name>`**。ワンショットは `colab run`（自動クリーンアップ）を優先
-2. **`colab repl` / `console` / `auth` / `drivemount` を対話モードで実行しない** — TTY 待ちでハングする（`repl`/`console` はパイプ入力なら可）
-3. **常に `-s <name>` でセッション名を明示する**
-4. CLI の 401/403 は ADC スコープ不足が原因 — `colab whoami` で確認。`colab auth` は VM 側の認証であり無関係
-5. 利用可能な GPU/TPU の種類はリファレンスの Provision 節を参照（ここには複製しない — vendored 更新時のドリフト防止）。アカウントの Colab プランによっては割当不可（400）— その場合は `--gpu T4` か CPU にフォールバック
+1. **`--auth=adc` を毎回サブコマンドの前に明示する**（リリース版 0.6.0 のデフォルトは oauth2 で、付け忘れると対話式の認可コード入力フローが始まりエージェントはハングする。vendored リファレンスの「デフォルト adc」は upstream main の記述で、リリース版と乖離）
+2. **使い終わったら必ず `colab stop -s <name>`**。ワンショットは `colab run`（自動クリーンアップ）を優先
+3. **`colab repl` / `console` / `auth` / `drivemount` を対話モードで実行しない** — TTY 待ちでハングする（`repl`/`console` はパイプ入力なら可）
+4. **常に `-s <name>` でセッション名を明示する**
+5. CLI の 401/403 は ADC スコープ不足が原因 — `colab --auth=adc whoami` で確認。`colab auth` は VM 側の認証であり無関係
+6. 利用可能な GPU/TPU の種類はリファレンスの Provision 節を参照（ここには複製しない — vendored 更新時のドリフト防止）。アカウントの Colab プランによっては割当不可（400）— その場合は `--gpu T4` か CPU にフォールバック
 
 ## Available Resources
 
