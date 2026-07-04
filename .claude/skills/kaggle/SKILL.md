@@ -27,7 +27,8 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 ### Setup and Tools
 - [kaggle-api-setup.md](kaggle-api-setup.md) - Kaggle API installation and authentication guide
 - [kaggle-scraping.md](kaggle-scraping.md) - Playwright スクレイピング + discussion 一括取得スクリプト
-- [colab-workflow.md](colab-workflow.md) - Google Colab + Claude Code development workflow
+- [colab-workflow.md](colab-workflow.md) - Google Colab + Claude Code development workflow（Drive 構成・チェックポイント戦略。実行は colab スキル推奨）
+- [../colab/SKILL.md](../colab/SKILL.md) - Colab CLI / MCP による実行（GPU/TPU ヘッドレス実行・ノートブックのライブ操作）
 - [claude-friendly-outputs.md](claude-friendly-outputs.md) - Creating outputs Claude can review locally
 - [data-analysis-workflow.md](data-analysis-workflow.md) - Complete data analysis workflow with Claude + Colab
 - [notebook-development-guide.md](notebook-development-guide.md) - Colab/Kaggle デュアル環境ノートブック開発ガイド
@@ -62,5 +63,5 @@ uv sync --extra kaggle
 For competitions requiring large datasets or GPU/TPU resources:
 - Develop code locally with Claude Code
 - Store data in Google Drive
-- Execute training on Google Colab
-- See [colab-workflow.md](colab-workflow.md) for complete setup guide
+- Execute training on Google Colab — prefer the Colab CLI (`colab run` / `colab exec`) via the [colab skill](../colab/SKILL.md); it runs scripts on GPU/TPU runtimes headlessly from the terminal
+- See [colab-workflow.md](colab-workflow.md) for the Drive structure and checkpointing guide

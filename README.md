@@ -17,13 +17,13 @@ A comprehensive template repository for individual software development projects
 
 ## Files Overview
 
-- `CLAUDE.md` - Main guidance file for Claude Code (< 60 lines, following Anthropic best practices)
+- `CLAUDE.md` - Main guidance file for Claude Code (project rules, structure, integrations)
 - `.claude/skills/` - Structured technical capabilities and domain knowledge (Claude Code recommended format)
 - `.claude/agents/` - Custom agent definitions (code-reviewer, codex-reviewer)
 - `.claude/commands/` - Custom slash commands for common tasks
 - `.claude/hooks/` - Claude Code hooks (completion notification, auto-format, PR review nudge)
 - `.claude/settings.json` - Development environment settings
-- `.claude/.mcp.json` - Model Context Protocol server configuration
+- `.mcp.json` - Model Context Protocol server configuration (project root — Claude Code はこの場所のみ読む)
 
 ## Usage
 
@@ -106,8 +106,28 @@ If you don't want this in your derived project, delete:
 - `.claude/agents/codex-reviewer.md`
 - `.claude/commands/codex-review.md`
 - `.claude/scripts/codex-run.sh`
-- The `codex` entry in `.claude/.mcp.json`
+- The `codex` entry in `.mcp.json`
 - The two `codex` lines from `.claude/settings.json` `permissions.allow` (the wrapper allow-list and `codex --version`)
+- This README section
+
+## Google Colab Integration (Optional)
+
+`.claude/skills/colab/` に Google 公式の Colab 連携 2 経路をまとめてある。Claude が「Colab で実行して」系の依頼で自動的に参照する:
+
+| Route | What it does | Setup |
+|-------|--------------|-------|
+| **Colab CLI**（推奨） | ターミナルから GPU/TPU ランタイムを確保しスクリプトをヘッドレス実行（`colab run` / `colab exec`）。成果物は `colab download` で回収 | `uv tool install google-colab-cli` + gcloud ADC 認証（[SKILL.md](.claude/skills/colab/SKILL.md) 参照）。macOS / Linux のみ |
+| **Colab MCP**（opt-in） | ブラウザで開いている Colab ノートブックのセルを Claude がライブ作成・実行 | `settings.local.json` の `enabledMcpjsonServers` に `"colab"` を追加（[colab-mcp.md](.claude/skills/colab/colab-mcp.md) 参照） |
+
+CLI の完全リファレンスは [colab-operator.md](.claude/skills/colab/colab-operator.md)（Google 公式 colab-operator スキルの vendored コピー、Apache-2.0）。CLI 導入後は `colab skill` で常に最新版を取得できる。
+
+### Removing the integration
+
+If you don't want this in your derived project, delete:
+- `.claude/skills/colab/`
+- The `colab` entry in `.mcp.json`
+- The "Google Colab Integration (Optional)" section and the `colab/` File Structure line in `CLAUDE.md`
+- The links to `../colab/SKILL.md` in `.claude/skills/kaggle/SKILL.md` (2 か所) and the banner in `.claude/skills/kaggle/colab-workflow.md`
 - This README section
 
 ## Kaggle Competition Development
@@ -189,7 +209,8 @@ outputs/reports/の最新実験レポート3件を比較して、
 - **[Kaggle User Guide](docs/kaggle-user-guide.md)** - Complete development workflow with instruction examples
 
 **Technical Documentation:**
-- **[colab-workflow.md](.claude/skills/kaggle/colab-workflow.md)** - Colab + Claude Code integration setup
+- **[colab skill](.claude/skills/colab/SKILL.md)** - Colab CLI / MCP execution (GPU/TPU headless runs, live notebook control)
+- **[colab-workflow.md](.claude/skills/kaggle/colab-workflow.md)** - Drive structure & checkpointing for Colab workflows
 - **[data-analysis-workflow.md](.claude/skills/kaggle/data-analysis-workflow.md)** - Step-by-step data analysis process
 - **[claude-friendly-outputs.md](.claude/skills/kaggle/claude-friendly-outputs.md)** - Creating outputs for Claude review
 - **[kaggle-api-setup.md](.claude/skills/kaggle/kaggle-api-setup.md)** - Kaggle CLI reference

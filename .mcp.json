@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "codex": {
+      "_comment": "OpenAI Codex CLI as MCP server. Requires `npm i -g @openai/codex` and `codex login`. Disabled by default — to enable, add \"codex\" to enabledMcpjsonServers in settings.local.json. See README.",
+      "command": "codex",
+      "args": ["mcp-server"],
+      "env": {
+        "CLAUDE_CODEX_DEPTH": "1"
+      }
+    },
+    "colab": {
+      "_comment": "Google Colab MCP server — lets Claude drive a Colab notebook open in your browser. Requires `uv` and `git`. Pinned to a release tag; bump deliberately. Disabled by default — to enable, add \"colab\" to enabledMcpjsonServers in settings.local.json. See .claude/skills/colab/colab-mcp.md.",
+      "command": "uvx",
+      "args": ["git+https://github.com/googlecolab/colab-mcp@v1.0.2"]
+    }
+  }
+}
