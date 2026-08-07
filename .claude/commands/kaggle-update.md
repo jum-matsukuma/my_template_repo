@@ -25,63 +25,19 @@ competition:
 
 別のコンペを指定: `/kaggle-update --comp other-competition-name`
 
-## Competition Tracker（3層構造）
+## 記録先（コンペ用スキル）
 
-**重要**: 競技の動向は以下の3つのファイルで追跡管理します:
+収集した情報の記録先と更新ルールは
+`.claude/skills/kaggle/experiment-tracking.md` に一本化してある。
+ここでは繰り返さない — 二重に書くと必ず片方が古くなる。
 
-| ファイル | 内容 | 更新方式 |
-|---------|------|---------|
-| `.claude/skills/<project>/SKILL.md` | 現在のパラメータ、ワークフロー、Next Steps | 置換 |
-| `.claude/skills/<project>/EXPERIMENT_LOG.md` | 実験履歴、結果、教訓 | 追記 |
-| `.claude/skills/<project>/COMPETITION_TRACKER.md` | リーダーボード、公開ノートブック分析 | 置換 |
+このコマンドの出力の行き先だけ再掲する:
 
-詳細: `.claude/skills/kaggle/experiment-tracking.md` を参照
-
-### Tracker更新ルール
-
-`/kaggle-update` 実行時の更新先:
-
-1. **リーダーボードに大きな変動があった場合** → `COMPETITION_TRACKER.md`
-   - 新しいトップスコアが出た
-   - 順位に大きな変動があった
-
-2. **新しい重要なノートブックが公開された場合** → `COMPETITION_TRACKER.md`
-   - 高投票数の新規ノートブック
-   - 新しいアプローチや手法
-
-3. **重要なテクニックを発見した場合**
-   - 採用候補 → `SKILL.md` の Next Steps に追加
-   - 実験済み → `EXPERIMENT_LOG.md` に結果を記録
-
-更新時は各ファイルの「Last updated」日付も更新すること。
-
-### アーカイブルール
-
-SKILL.mdが肥大化したり、古い情報が不要になった場合は**アーカイブ**する:
-
-**アーカイブ先**:
-```
-docs/archive/<project-name>/
-├── YYYY-MM-DD_archived_content.md
-└── ...
-```
-
-**アーカイブ対象**:
-- 既に実装済みで検証完了したテクニック詳細
-- 古いリーダーボード情報
-- 採用しなかったアプローチの詳細分析
-- 過去のノートブック分析（新しいものに置き換わった場合）
-
-**アーカイブ手順**:
-1. 削除する内容を `docs/archive/<project-name>/YYYY-MM-DD_<topic>.md` にコピー
-2. SKILL.md から該当セクションを削除
-3. 必要なら SKILL.md に「アーカイブ済み」のリンクを残す
-
-**SKILL.mdに残すべき情報**:
-- 現在のベストスコアとパラメータ
-- 最新のリーダーボード状況
-- 未実装の改善アイデア（Next Steps）
-- 直近の重要なノートブック分析
+| 収集したもの | 記録先 |
+|---|---|
+| リーダーボード動向・公開 notebook の分析 | `existing-solutions.md` |
+| 採用候補のテクニック | `EXPERIMENT_LOG.md` の Next Steps |
+| 締切・提出制約・データ仕様の変更 | `COMPETITION_TRACKER.md` |
 
 ## What This Command Does
 
@@ -94,18 +50,15 @@ uv run kaggle competitions leaderboard <competition-name> --show
 ```
 
 ### 2. 公開ノートブック
-人気順と新着順でノートブック一覧を取得:
+人気順と新着順で一覧を取得:
 ```bash
 uv run kaggle kernels list --competition <competition-name> --sort-by voteCount --page-size 5
 uv run kaggle kernels list --competition <competition-name> --sort-by dateCreated --page-size 5
 ```
 
-**重要**: 上位ノートブックについては、Kaggle APIでダウンロードして中身を確認した上でサマリーを作成:
-```bash
-uv run kaggle kernels pull <kernel-ref> -p data/kaggle_notebooks/<notebook-name>/
-```
-
-ダウンロードした.ipynbファイルをReadツールで読み込み、内容を分析して日本語サマリーを作成する。
+**ソースの取得は `/kaggle-research` が済ませている** ので、ここでは
+`research/notebooks/<ref>/` の .ipynb を Read で読み、手法・アルゴリズム・
+技術スタックを日本語で要約する。別の場所へ二重にダウンロードしない。
 
 ### 3. 自分の提出履歴
 過去の提出結果を取得:
@@ -113,58 +66,30 @@ uv run kaggle kernels pull <kernel-ref> -p data/kaggle_notebooks/<notebook-name>
 uv run kaggle competitions submissions <competition-name>
 ```
 
-### 4. ディスカッション
-Playwright ベースのスクレイパーで全ディスカッション + コメントを取得:
+### 4. ディスカッション・notebook・コメント・writeup
+
+**`/kaggle-research` に委譲する。** コマンドとフラグの説明はそちらが持つ
+（同じ手順を2箇所に書くと必ず片方が古くなる）:
+
 ```bash
-# 増分更新（推奨: 新規・更新トピックのみ取得、~1-2分）
-uv run python scripts/fetch_discussions.py --competition <competition-name> --update --delay 10.0
-
-# 初回フル取得（全トピック、~50-60分）
-uv run python scripts/fetch_discussions.py --competition <competition-name> --delay 10.0
-
-# トピック一覧のみ（高速）
-uv run python scripts/fetch_discussions.py --competition <competition-name> --topics-only
-
-# 中断再開
-uv run python scripts/fetch_discussions.py --competition <competition-name> --resume --delay 10.0
+python3 scripts/kaggle_research.py --comp <competition-name> --out research
 ```
 
-**出力先**: `docs/discussions/`
-```
-docs/discussions/
-├── topic_list.json          # トピック一覧メタデータ
-├── discussions_full.json    # 全トピック詳細 + コメント
-├── INDEX.md                 # Markdown インデックス
-└── markdown/                # トピック別 .md ファイル
-```
+取得結果は `research/` に入る。このコマンドの仕事は、その中身を読んで
+**日本語の要約レポートを作ること**であって、取得そのものではない。
 
-**注意事項**:
-- 初回は `--delay 10.0` を推奨（Kaggle レートリミット対策）
-- `--update` は前回の `discussions_full.json` の `fetchedAt` を基準に差分検出
-- Playwright + Chromium が必要: `uv sync --extra kaggle && uv run playwright install chromium`
-- スクリプト詳細・内部 API の仕組みは `.claude/skills/kaggle/kaggle-scraping.md` を参照
-
-**取得後のアクション**:
-1. `docs/discussions/INDEX.md` を読んで新しいトピックを確認
-2. 重要な知見は `COMPETITION_TRACKER.md` に反映
-3. 採用候補のテクニックは `SKILL.md` の Next Steps に追加
+実行後は必ず出力の **warnings 欄**を見る — `fetched X of Y comments` は
+取りこぼしのサイン。落とし穴の詳細は
+`.claude/skills/kaggle/kaggle-scraping.md`。
 
 ### 5. 手動確認リンク
 - Overview: https://www.kaggle.com/competitions/<competition-name>/overview
 
 ## Notebook Storage
 
-ダウンロードしたノートブックは以下に保存:
-```
-data/kaggle_notebooks/
-├── <notebook-name-1>/
-│   └── <notebook-name-1>.ipynb
-├── <notebook-name-2>/
-│   └── <notebook-name-2>.ipynb
-└── ...
-```
-
-このディレクトリは `.gitignore` に登録し、コミットしないこと。
+notebook ソースの保管先は `research/notebooks/<ref>/` の一箇所だけ
+（`kaggle_research.py` が管理し、`.gitignore` 済み — 他人の著作物なので
+コミットしない）。
 
 ## Output Format
 
@@ -199,7 +124,7 @@ Kaggle コンペ更新情報
 ------------------------------------------------------------
 Tracker更新
 ------------------------------------------------------------
-[COMPETITION_TRACKER.md / SKILL.md への更新内容があれば記載]
+[existing-solutions.md / EXPERIMENT_LOG.md への更新内容があれば記載]
 
 ------------------------------------------------------------
 手動確認リンク
@@ -208,7 +133,7 @@ Tracker更新
 - Announcements: URL
 - SKILL.md: .claude/skills/<project-name>/SKILL.md
 - EXPERIMENT_LOG: .claude/skills/<project-name>/EXPERIMENT_LOG.md
-- COMPETITION_TRACKER: .claude/skills/<project-name>/COMPETITION_TRACKER.md
+- existing-solutions: .claude/skills/<project-name>/existing-solutions.md
 ============================================================
 ```
 

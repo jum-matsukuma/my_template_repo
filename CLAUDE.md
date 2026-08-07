@@ -129,6 +129,8 @@ Kaggle CLI のセットアップと全コマンドリファレンスは `.claude
 - 詳細な内容は個別の支援ファイルに分割し、SKILL.mdから相対パスでリンクする
 - 各支援ファイルは1つのトピックに集中させ、100〜300行を目安とする
 - 支援ファイルが300行を超えた場合はさらに分割を検討する
+- **新しいファイルを足す前に、該当 SKILL.md の索引でそのトピックの持ち主が既にいないか確認する。**
+  いれば新規作成ではなくそこを更新する（重複した規約は必ず片方が古くなる）
 
 ```
 .claude/skills/my-skill/
@@ -191,15 +193,19 @@ project-root/
 │   ├── agents/         # Custom agent definitions
 │   │   ├── code-reviewer.md
 │   │   └── codex-reviewer.md
-│   ├── commands/       # Slash commands (/pr, /codex-review, /docs, /test, ...)
+│   ├── commands/       # Slash commands (/pr, /kaggle-research, /codex-review, ...)
 │   ├── hooks/          # notify.sh / format.sh / pr-review-nudge.sh
+│   ├── ops/            # 無人の定期ジョブ (launchd → draft PR)。opt-in
+│   │   └── README.md
 │   └── skills/         # Skills directory (Claude Code recommended format)
 │       ├── colab/      # Google Colab integration (CLI headless実行 / MCP notebook操作)
 │       │   └── SKILL.md
 │       ├── kaggle/     # Kaggle competition skills
 │       │   └── SKILL.md
-│       └── templates/  # Skill templates (technology-stack, custom-tools, project-domain)
+│       └── templates/  # Skill templates (technology-stack, custom-tools,
+│           └── competition/   #  project-domain, competition 雛形)
 ├── kaggle-template/    # Kaggle competition template
+│   └── scripts/kaggle_research.py   # 公開情報の差分取得（公式CLI）
 └── README.md           # Project overview
 ```
 
@@ -221,4 +227,20 @@ cd my-competition/
 uv sync --extra kaggle
 ```
 
-セットアップ・Colab連携（GPU実行）・実験トラッキング（SKILL.md / EXPERIMENT_LOG.md / COMPETITION_TRACKER.md の3層構造）の詳細は `.claude/skills/kaggle/SKILL.md` とその支援ファイルを参照。
+セットアップ・Colab連携（GPU実行）・実験トラッキングの構成と更新ルールは `.claude/skills/kaggle/experiment-tracking.md`、
+ファイルの実体は `.claude/skills/templates/competition/` を参照。
+
+新しいコンペを始めるときは、コンペ用スキルの雛形をコピーする:
+
+```bash
+cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
+```
+
+公開情報（notebook / discussion / コメント / writeup）の取得は
+`kaggle-template/scripts/kaggle_research.py` を使う（`/kaggle-research`）。
+**公式 Kaggle CLI が正の経路で、Playwright は不要**。落とし穴は
+`.claude/skills/kaggle/kaggle-scraping.md` に実測付きでまとめてある。
+
+日次で自動取得して draft PR にする仕組みが `.claude/ops/` にある（**opt-in**、
+`ops.conf` を作って `install.sh` を実行したときだけ動く）。詳細は
+`.claude/ops/README.md`。

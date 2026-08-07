@@ -169,6 +169,34 @@ This template includes a complete workflow for Kaggle competitions with Claude C
    - **Colab**: Execute with GPU/TPU (minimal wrapper notebooks)
    - **Local**: Review results synced via Google Drive
 
+5. **Set up the competition skill** (context that survives session boundaries):
+   ```bash
+   cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
+   ```
+   An index, an experiment log, a **do-not-retry list**, the fixed rules/data spec,
+   a public-solutions tracker, and a runbook. That directory's README explains why
+   each one exists; `.claude/skills/kaggle/experiment-tracking.md` owns the rules
+   for what goes where.
+
+### Researching what others have published
+
+```bash
+python3 scripts/kaggle_research.py --comp <slug> --out research   # differential fetch
+python3 scripts/kaggle_research.py --comp <slug> --audit          # coverage report only
+```
+
+Pulls notebooks, discussions, kernel comments and writeups via the official Kaggle
+CLI. Flags, output layout and the traps that cost real information live in
+**`.claude/commands/kaggle-research.md`** (how to run it) and
+**`.claude/skills/kaggle/kaggle-scraping.md`** (why, and what breaks).
+
+### Unattended daily fetch (optional)
+
+`.claude/ops/` runs that fetch on a schedule via launchd and publishes each day's
+diff as a **draft PR**. Opt-in — nothing is scheduled until you create `ops.conf`
+and run `install.sh`. Setup, safety properties and teardown are in
+**`.claude/ops/README.md`**.
+
 ### Example Instructions for Claude Code
 
 **Data exploration:**
