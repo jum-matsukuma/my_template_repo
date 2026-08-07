@@ -173,8 +173,10 @@ This template includes a complete workflow for Kaggle competitions with Claude C
    ```bash
    cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
    ```
-   Five files: an index, an experiment log, a **do-not-retry list**, the data/rules
-   spec, and a runbook. See that directory's README for why each one exists.
+   An index, an experiment log, a **do-not-retry list**, the fixed rules/data spec,
+   a public-solutions tracker, and a runbook. That directory's README explains why
+   each one exists; `.claude/skills/kaggle/experiment-tracking.md` owns the rules
+   for what goes where.
 
 ### Researching what others have published
 
@@ -183,29 +185,17 @@ python3 scripts/kaggle_research.py --comp <slug> --out research   # differential
 python3 scripts/kaggle_research.py --comp <slug> --audit          # coverage report only
 ```
 
-Pulls notebooks, discussions, kernel comments and writeups. The official Kaggle
-CLI covers everything except writeup *bodies*, so **Playwright is not needed** —
-see `.claude/skills/kaggle/kaggle-scraping.md` for the measured comparison and
-the traps (truncated plain output, a comment API that silently under-fetches,
-and why top-N fetching builds a permanent blind spot).
-
-Read the **warnings** in the output: `fetched 3 of 4 comments` means Kaggle
-reports more than was retrieved.
+Pulls notebooks, discussions, kernel comments and writeups via the official Kaggle
+CLI. Flags, output layout and the traps that cost real information live in
+**`.claude/commands/kaggle-research.md`** (how to run it) and
+**`.claude/skills/kaggle/kaggle-scraping.md`** (why, and what breaks).
 
 ### Unattended daily fetch (optional)
 
-`.claude/ops/` runs the fetch on a schedule via launchd and publishes each day's
-diff as a **draft PR**, so new discussions and edited writeups arrive as
-something reviewable rather than something you have to remember to check.
-
-```bash
-cd .claude/ops && cp ops.conf.example ops.conf   # fill in REPO, COMP, PREFIX, STOP_DATE
-./install.sh
-./uninstall.sh                                    # run this when the competition ends
-```
-
-Opt-in: nothing is scheduled until you create `ops.conf` and run `install.sh`.
-Details and the safety properties are in `.claude/ops/README.md`.
+`.claude/ops/` runs that fetch on a schedule via launchd and publishes each day's
+diff as a **draft PR**. Opt-in — nothing is scheduled until you create `ops.conf`
+and run `install.sh`. Setup, safety properties and teardown are in
+**`.claude/ops/README.md`**.
 
 ### Example Instructions for Claude Code
 
