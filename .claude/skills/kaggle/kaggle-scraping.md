@@ -96,9 +96,15 @@ writeup の 400 バイトの Cookie バナーを「取得成功」として保�
   （例: `discussions.DiscussionsService`）。**バージョン無しで予告なく変わる**
 - 内部エンドポイントの多くは**ブラウザコンテキストを検証する**ので、`requests`
   だけでは通らずページ遷移が要る。これが当初 Playwright を導入した理由
-- 旧実装（Playwright + 内部 API、490 行）は git 履歴にある。
-  `git log --all --diff-filter=D -- '*fetch_discussions.py'` で SHA を出し、
-  `git show <sha>:kaggle-template/scripts/fetch_discussions.py` で読める
+- 旧実装（Playwright + 内部 API、490 行）は git 履歴にある:
+
+  ```bash
+  SHA=$(git log --all --diff-filter=D --format=%h -- '*fetch_discussions.py' | head -1)
+  git show "${SHA}^:kaggle-template/scripts/fetch_discussions.py"
+  ```
+
+  **`^` を付けて親コミットを指すこと** — 削除コミットそのものには
+  もうファイルが無い
 - **ただし取りこぼしの前科がある実装なので、復活させるより
   レンダリング済みページを取りに行く方が筋が良い**
 

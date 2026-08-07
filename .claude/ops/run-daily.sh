@@ -18,6 +18,11 @@ CONF="$OPS_DIR/ops.conf"
 # shellcheck source=/dev/null
 source "$CONF"
 
+# Required, and validated here rather than failing obscurely later under `set -u`.
+: "${REPO:?ops.conf must set REPO}"
+: "${PREFIX:?ops.conf must set PREFIX}"
+STOP_DATE="${STOP_DATE:-2099-12-31}"
+
 export HOME="${HOME:-$(eval echo "~$(id -un)")}"
 # launchd hands us a minimal PATH; name the tool locations explicitly.
 export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"

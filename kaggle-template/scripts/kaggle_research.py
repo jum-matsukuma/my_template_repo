@@ -578,10 +578,11 @@ def main() -> int:
                 errors.append(f"writeup {key}: {err}")
                 m_wu.setdefault(key, {"url": url})["lastError"] = err
                 continue
-            m_wu.get(key, {}).pop("lastError", None)
             digest = sha(body)
             if prev and prev.get("sha") and prev["sha"] != digest:
                 wu_changed.append(key)
+            # Full replace, which is what clears any previous lastError/gone
+            # marker: a writeup that fetched cleanly is no longer in either state.
             m_wu[key] = {
                 "url": url,
                 "sha": digest,

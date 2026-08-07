@@ -9,6 +9,21 @@ set -uo pipefail
 
 # shellcheck source=/dev/null
 source "${CONF:?run via run-daily.sh}"
+
+# Defaults for the optional settings. Without these, a config that omits one of
+# them kills the job under `set -u` at 3am, which is the worst possible time to
+# discover a missing variable.
+: "${REPO:?ops.conf must set REPO}"
+: "${COMP:?ops.conf must set COMP}"
+OUT_DIR="${OUT_DIR:-research}"
+FETCH_ARGS="${FETCH_ARGS:-}"
+COMMIT_PATHS="${COMMIT_PATHS:-$OUT_DIR/discussions $OUT_DIR/writeups $OUT_DIR/manifest.json}"
+
+# ops.conf is *sourced*, which only creates shell variables. The fetcher reads
+# this from the environment, so without an explicit export a key set in
+# ops.conf would silently do nothing.
+[ -n "${JINA_API_KEY:-}" ] && export JINA_API_KEY
+
 cd "$REPO" || exit 1
 
 SUMMARY="$(mktemp)"
