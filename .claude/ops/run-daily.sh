@@ -49,23 +49,48 @@ if [[ "$TODAY" > "$STOP_DATE" ]]; then
 fi
 
 # --- overlap guard (mkdir is atomic on every filesystem we care about) ------
+#
+# Liveness is decided by the recorded PID, not by mtime alone. A --full re-pull
+# or a Jina rate-limit backoff can legitimately run past any fixed age cutoff,
+# and stealing the lock from a job that is still working means two runs do
+# checkout/commit/push concurrently in one working tree.
 LOCKDIR="$OPS_DIR/locks/${JOB}.lockdir"
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
-  if [ -n "$(find "$LOCKDIR" -maxdepth 0 -mmin +180 2>/dev/null)" ]; then
-    echo "stale lock (>3h) - reclaiming"
-    rmdir "$LOCKDIR" 2>/dev/null
-    mkdir "$LOCKDIR" 2>/dev/null || { echo "lock race; skip"; exit 0; }
-  else
-    echo "another $JOB run holds the lock; skip"
+  HOLDER="$(cat "$LOCKDIR/pid" 2>/dev/null || echo "")"
+  if [ -n "$HOLDER" ] && kill -0 "$HOLDER" 2>/dev/null; then
+    echo "another $JOB run (pid $HOLDER) is alive; skip"
     exit 0
   fi
+  echo "lock held by dead/unknown pid '${HOLDER:-none}' - reclaiming"
+  rm -rf "$LOCKDIR"
+  mkdir "$LOCKDIR" 2>/dev/null || { echo "lock race; skip"; exit 0; }
 fi
-trap 'rmdir "$LOCKDIR" 2>/dev/null' EXIT
+echo "$$" > "$LOCKDIR/pid"
+trap 'rm -rf "$LOCKDIR"' EXIT
 
 cd "$REPO" || { echo "cd $REPO failed"; exit 1; }
 
+# --- refuse to operate on a repo left mid-rebase ----------------------------
+# Continuing here would run the job on a detached HEAD, which makes the child
+# script's "restore the original branch" logic restore to the literal "HEAD".
+GITDIR="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
+if [ -d "$GITDIR/rebase-merge" ] || [ -d "$GITDIR/rebase-apply" ]; then
+  echo "repo has a rebase in progress - refusing to run (resolve it by hand)"
+  exit 1
+fi
+
 # --- sync in: absorb what other sessions and jobs have pushed ---------------
-git pull --rebase --autostash 2>&1 | tail -3 || echo "git pull warning (continuing)"
+# A failed pull must stop the run. Carrying on would operate on a conflicted or
+# detached tree, and the failure would compound silently every night after.
+PULL_LOG="$(mktemp)"
+if ! git pull --rebase --autostash >"$PULL_LOG" 2>&1; then
+  tail -5 "$PULL_LOG"
+  echo "git pull failed - aborting run and leaving the repo untouched"
+  git rebase --abort 2>/dev/null || true
+  rm -f "$PULL_LOG"
+  exit 1
+fi
+tail -3 "$PULL_LOG"; rm -f "$PULL_LOG"
 
 # --- per-day dedup (machine-local; launchd is one per machine) --------------
 STATE="$OPS_DIR/.state-${JOB}"
@@ -80,6 +105,13 @@ JOB_SCRIPT="$OPS_DIR/${JOB}.sh"
 OPS_DIR="$OPS_DIR" CONF="$CONF" bash "$JOB_SCRIPT"
 RC=$?
 
-echo "$TODAY" > "$STATE"
+# Only a successful run counts as "done today". Stamping unconditionally means
+# one bad night (auth expiry, network blip) silently skips that day's fetch for
+# good, because every retry short-circuits on the dedup check.
+if [ "$RC" -eq 0 ]; then
+  echo "$TODAY" > "$STATE"
+else
+  echo "rc=$RC - not marking $TODAY complete, so a retry today can still run"
+fi
 echo "=== $JOB end rc=$RC $(date '+%F %T') ==="
 exit "$RC"

@@ -19,6 +19,9 @@ set -uo pipefail
 
 # shellcheck source=/dev/null
 source "${CONF:?run via run-daily.sh}"
+
+: "${REPO:?ops.conf must set REPO}"
+: "${PREFIX:?ops.conf must set PREFIX}"
 cd "$REPO" || exit 1
 
 OPS_DIR="${OPS_DIR:-$REPO/.claude/ops}"
@@ -49,14 +52,58 @@ claude -p "$(cat "$PROMPT_FILE")" \
   --add-dir "$REPO" 2>&1 | tail -25
 
 # --- wrapper finalizes: the agent has no Bash by design ---------------------
+#
+# Onto a dedicated branch, never onto whatever happened to be checked out. The
+# agent fires overnight, and a developer's repo is very often parked on a
+# feature or experiment branch -- committing there would interleave unreviewed
+# machine edits with in-progress human work.
 FACTCHECK_PATHS="${FACTCHECK_PATHS:-.claude/skills docs}"
 # shellcheck disable=SC2086
-if ! git diff --quiet -- $FACTCHECK_PATHS 2>/dev/null \
-   || [ -n "$(git ls-files --others --exclude-standard -- $FACTCHECK_PATHS 2>/dev/null)" ]; then
-  # shellcheck disable=SC2086
-  git add -A $FACTCHECK_PATHS 2>/dev/null
-  git commit -q -m "chore(ops): daily fact-check $(date +%F) [launchd]" \
-    && git push -q && echo "[factcheck] committed + pushed"
-else
+if git diff --quiet -- $FACTCHECK_PATHS 2>/dev/null \
+   && [ -z "$(git ls-files --others --exclude-standard -- $FACTCHECK_PATHS 2>/dev/null)" ]; then
   echo "[factcheck] no changes to commit"
+  exit 0
+fi
+
+DATE="$(date +%F)"
+BRANCH="ops/factcheck-${PREFIX}-$DATE"
+BASE="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')"
+BASE="${BASE:-main}"
+ORIG_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+if [ "$ORIG_BRANCH" = "HEAD" ]; then
+  echo "[factcheck] detached HEAD; leaving edits uncommitted for a human to review"
+  exit 1
+fi
+
+restore() {
+  local rc=$?
+  [ "$(git rev-parse --abbrev-ref HEAD)" != "$ORIG_BRANCH" ] \
+    && git checkout -q "$ORIG_BRANCH" 2>/dev/null \
+    && echo "[factcheck] restored branch $ORIG_BRANCH"
+  exit "$rc"
+}
+trap restore EXIT
+
+# Carry the working-tree edits onto the ops branch. `checkout -b` keeps
+# uncommitted changes, which is exactly what we want here.
+if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+  git checkout -q "$BRANCH" || exit 1
+else
+  git checkout -q -b "$BRANCH" || exit 1
+fi
+
+# shellcheck disable=SC2086
+git add -A $FACTCHECK_PATHS 2>/dev/null
+if git commit -q -m "chore(ops): daily fact-check $DATE [launchd]"; then
+  git push -q -u origin "$BRANCH" && echo "[factcheck] pushed to $BRANCH" \
+    || echo "[factcheck] push failed (commit is local on $BRANCH)"
+  if command -v gh >/dev/null 2>&1 && ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+    gh pr create --draft --base "$BASE" \
+      --title "chore(ops): fact-check $DATE" \
+      --body "無人のファクトチェックが記述の誤りを修正した差分。\`REVIEW NEEDED\` と記録された項目は人間の判断待ち。" \
+      >/dev/null 2>&1 && echo "[factcheck] draft PR opened"
+  fi
+else
+  echo "[factcheck] nothing staged"
 fi

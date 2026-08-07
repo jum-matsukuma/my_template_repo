@@ -256,15 +256,27 @@ def list_all_kernels(comp: str, max_pages: int = 40, page_size: int = 50) -> dic
     return seen
 
 
-def fetch_kernel_comments(ref: str, dest: Path) -> tuple[dict | None, str | None]:
-    """Kernel comments via the official CLI: topics list -> topics show.
+def list_kernel_topics(ref: str) -> tuple[list | None, str | None]:
+    """Cheap probe: the comment threads on a notebook, with their counts.
+
+    One call per notebook. It is what makes change detection correct: comments
+    accumulate on their own timeline, entirely independent of when the notebook
+    last ran. (Measured: a thread posted 2026-06-23 on a notebook whose
+    lastRunTime is 2026-08-01.) Keying comment freshness off lastRunTime would
+    mean a new comment on an older notebook is never seen -- precisely the kind
+    of silent miss this tool exists to prevent.
+    """
+    return kaggle_json(["kernels", "topics", "list", ref])
+
+
+def fetch_kernel_comments(
+    ref: str, dest: Path, topics: list
+) -> tuple[dict | None, str | None]:
+    """Pull the full comment tree for each of a notebook's threads.
 
     This is the surface an earlier implementation missed entirely, reaching for
     the kagglesdk discussions client instead and under-fetching by ~4x.
     """
-    topics, err = kaggle_json(["kernels", "topics", "list", ref])
-    if topics is None:
-        return None, err
     if not topics:
         dest.write_text("[]")
         return {"threads": 0, "commentCount": 0, "commentsFetched": 0}, None
@@ -414,12 +426,34 @@ def main() -> int:
         d.mkdir(parents=True, exist_ok=True)
     manifest_path = out / "manifest.json"
 
-    manifest = {}
-    if manifest_path.exists() and not a.full:
+    disk = {}
+    if manifest_path.exists():
         try:
-            manifest = json.loads(manifest_path.read_text())
+            disk = json.loads(manifest_path.read_text())
         except json.JSONDecodeError:
             print("! manifest.json unreadable; starting fresh", file=sys.stderr)
+
+    if not a.full:
+        manifest = disk
+    else:
+        # --full re-pulls from scratch, but the manifest is written back as a
+        # whole file. Sections this run is NOT re-fetching must be carried over
+        # or they are erased -- including the writeup `gone` / `lastError`
+        # markers, whose whole purpose is to stop the daily job re-reporting
+        # writeups that were deleted upstream.
+        manifest = {}
+        if a.skip_notebooks or a.skip_comments:
+            manifest["kernel_comments"] = disk.get("kernel_comments", {})
+        if a.skip_notebooks:
+            manifest["notebooks"] = disk.get("notebooks", {})
+        if a.skip_writeups:
+            manifest["writeups"] = disk.get("writeups", {})
+        carried = [
+            k for k in ("notebooks", "kernel_comments", "writeups") if k in manifest
+        ]
+        if carried:
+            print(f"  --full: carrying over skipped sections {carried}")
+
     m_nb = manifest.setdefault("notebooks", {})
     m_tp = manifest.setdefault("topics", {})
     m_kc = manifest.setdefault("kernel_comments", {})
@@ -427,6 +461,7 @@ def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
     wu_gone: list[str] = []
+    kc_changed: list[str] = []
 
     # ---- enumerate discussion topics (ALL of them, by default) ----
     print(f"enumerating topics for {a.comp} ...")
@@ -522,12 +557,30 @@ def main() -> int:
                 errors.append(f"kernels pull {ref}: {e.strip()[:160]}")
 
         # ---- kernel comments (official CLI, with count verification) ----
+        #
+        # Freshness is keyed off the notebook's own comment count, NOT its
+        # lastRunTime: the two move independently, so a new comment on an
+        # untouched notebook must still be picked up. That costs one cheap
+        # `topics list` call per notebook per run; the expensive `topics show`
+        # only runs when the count actually moved.
         if not a.skip_comments and not a.dry_run:
-            for ref, k in sorted(kernels.items()):
+            for ref in sorted(kernels):
                 prev = m_kc.get(ref)
-                if prev is not None and prev.get("lastRunTime") == k.get("lastRunTime"):
+                topics_l, err = list_kernel_topics(ref)
+                if topics_l is None:
+                    errors.append(f"kernel topics list {ref}: {err}")
                     continue
-                rec, err = fetch_kernel_comments(ref, kc_dir / f"{safe_name(ref)}.json")
+                declared = sum(int(t.get("commentCount") or 0) for t in topics_l)
+                if (
+                    prev is not None
+                    and prev.get("commentCount") == declared
+                    and prev.get("threads") == len(topics_l)
+                    and not a.full
+                ):
+                    continue
+                rec, err = fetch_kernel_comments(
+                    ref, kc_dir / f"{safe_name(ref)}.json", topics_l
+                )
                 if rec is None:
                     errors.append(f"kernel comments {ref}: {err}")
                     continue
@@ -536,8 +589,8 @@ def main() -> int:
                         f"kernel {ref}: fetched {rec['commentsFetched']} of "
                         f"{rec['commentCount']} comments"
                     )
-                rec["lastRunTime"] = k.get("lastRunTime")
                 m_kc[ref] = rec
+                kc_changed.append(ref)
                 time.sleep(1.0)
 
     # ---- writeups: discover via CLI corpus, fetch bodies via Jina ----
@@ -602,6 +655,10 @@ def main() -> int:
     print(f"\n=== {a.comp} ===")
     print(f"topics:     {len(tp_new)} new, {len(tp_upd)} updated (tracked {len(m_tp)})")
     print(f"notebooks:  {len(nb_new)} new, {len(nb_upd)} updated (tracked {len(m_nb)})")
+    print(
+        f"comments:   {len(kc_changed)} notebooks with new/changed comments "
+        f"(tracked {len(m_kc)})"
+    )
     print(
         f"writeups:   {len(wu_new)} new, {len(wu_changed)} edited (tracked {len(m_wu)})"
     )

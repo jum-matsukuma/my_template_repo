@@ -5,16 +5,19 @@
 # and pulled. Runs as a pure script -- no agent. Judgement calls stay out of the
 # unattended path; the job's job is to make a change reviewable, not to decide
 # what it means.
+#
+# ORDER MATTERS: the target branch is checked out BEFORE the fetcher runs.
+# Fetching first leaves manifest.json modified in the working tree, and git
+# then refuses to switch branches ("local changes would be overwritten"), so
+# every run after the first would fail to reach its own PR.
 set -uo pipefail
 
 # shellcheck source=/dev/null
 source "${CONF:?run via run-daily.sh}"
 
-# Defaults for the optional settings. Without these, a config that omits one of
-# them kills the job under `set -u` at 3am, which is the worst possible time to
-# discover a missing variable.
 : "${REPO:?ops.conf must set REPO}"
 : "${COMP:?ops.conf must set COMP}"
+: "${PREFIX:?ops.conf must set PREFIX}"
 OUT_DIR="${OUT_DIR:-research}"
 FETCH_ARGS="${FETCH_ARGS:-}"
 COMMIT_PATHS="${COMMIT_PATHS:-$OUT_DIR/discussions $OUT_DIR/writeups $OUT_DIR/manifest.json}"
@@ -26,14 +29,70 @@ COMMIT_PATHS="${COMMIT_PATHS:-$OUT_DIR/discussions $OUT_DIR/writeups $OUT_DIR/ma
 
 cd "$REPO" || exit 1
 
-SUMMARY="$(mktemp)"
-trap 'rm -f "$SUMMARY"' EXIT
-
 FETCHER="scripts/kaggle_research.py"
 [ -f "$FETCHER" ] || FETCHER="kaggle-template/scripts/kaggle_research.py"
 [ -f "$FETCHER" ] || { echo "[research] no kaggle_research.py found under $REPO"; exit 1; }
 
-echo "[research] running $FETCHER for $COMP"
+SUMMARY="$(mktemp)"
+
+# --- refuse to run on a repo that is not in a clean, known state ------------
+if [ -n "$(git status --porcelain -- $COMMIT_PATHS 2>/dev/null)" ]; then
+  echo "[research] $COMMIT_PATHS already has uncommitted changes; refusing to run"
+  echo "           (commit or discard them, then re-run)"
+  rm -f "$SUMMARY"; exit 1
+fi
+
+ORIG_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+if [ "$ORIG_BRANCH" = "HEAD" ]; then
+  echo "[research] repo is in detached HEAD (interrupted rebase?); refusing to run"
+  rm -f "$SUMMARY"; exit 1
+fi
+
+# --- pick a branch: extend an open ops PR, else start today's ---------------
+DATE="$(date +%F)"
+# PREFIX keeps two competitions sharing one repo from landing on the same
+# branch and mixing their diffs into one PR.
+BRANCH="ops/research-${PREFIX}-$DATE"
+BASE="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')"
+BASE="${BASE:-main}"
+
+EXISTING=""
+if command -v gh >/dev/null 2>&1; then
+  EXISTING="$(gh pr list --state open --limit 100 --json headRefName \
+                --jq "[.[].headRefName | select(startswith(\"ops/research-${PREFIX}-\"))][0] // empty" \
+                2>/dev/null || true)"
+fi
+[ -n "$EXISTING" ] && BRANCH="$EXISTING"
+
+CREATED_BRANCH=0
+restore_branch() {
+  local rc=$?
+  if [ "$(git rev-parse --abbrev-ref HEAD)" != "$ORIG_BRANCH" ]; then
+    git checkout -q "$ORIG_BRANCH" 2>/dev/null && echo "[research] restored branch $ORIG_BRANCH"
+    # A branch we created but never committed to is pure litter.
+    if [ "$CREATED_BRANCH" = "1" ] && \
+       [ -z "$(git rev-list "origin/$BASE..$BRANCH" 2>/dev/null)" ]; then
+      git branch -q -D "$BRANCH" 2>/dev/null && echo "[research] removed empty $BRANCH"
+    fi
+  fi
+  rm -f "$SUMMARY"
+  exit "$rc"
+}
+trap restore_branch EXIT
+
+if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+  git checkout -q "$BRANCH" || exit 1
+elif git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+  git checkout -q -b "$BRANCH" "origin/$BRANCH" || exit 1
+  CREATED_BRANCH=1
+else
+  git checkout -q -b "$BRANCH" "origin/$BASE" 2>/dev/null \
+    || git checkout -q -b "$BRANCH" || exit 1
+  CREATED_BRANCH=1
+fi
+
+# --- fetch, now that we are on the branch the results belong on ------------
+echo "[research] running $FETCHER for $COMP on $BRANCH"
 # shellcheck disable=SC2086
 python3 "$FETCHER" --comp "$COMP" --out "$OUT_DIR" $FETCH_ARGS 2>&1 | tee "$SUMMARY" | tail -25
 FETCH_RC=${PIPESTATUS[0]}
@@ -46,54 +105,14 @@ git diff --quiet -- $COMMIT_PATHS 2>/dev/null || CHANGED=1
 [ -n "$(git ls-files --others --exclude-standard -- $COMMIT_PATHS 2>/dev/null)" ] && CHANGED=1
 
 if [ "$CHANGED" = "0" ]; then
-  echo "[research] no diff today ($(date +%F)); no PR opened"
+  echo "[research] no diff today ($DATE); no PR opened"
   exit "$FETCH_RC"
-fi
-
-# --- pick a branch: extend today's/an open one, else start a new one --------
-DATE="$(date +%F)"
-BRANCH="ops/research-$DATE"
-BASE="$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')"
-BASE="${BASE:-main}"
-
-EXISTING=""
-if command -v gh >/dev/null 2>&1; then
-  # Reuse an already-open ops PR so a week of runs is one reviewable thread
-  # rather than seven abandoned ones.
-  EXISTING="$(gh pr list --state open --limit 100 --json headRefName \
-                --jq '[.[].headRefName | select(startswith("ops/research-"))][0] // empty' \
-                2>/dev/null || true)"
-fi
-[ -n "$EXISTING" ] && BRANCH="$EXISTING"
-
-ORIG_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-# Whatever happens from here on -- push rejected, gh missing, network gone --
-# the repository must end up back on the branch we found it on. Leaving a
-# user's checkout parked on an ops branch corrupts the next run's pull and is
-# baffling to walk into in the morning.
-restore_branch() {
-  local rc=$?
-  [ "$(git rev-parse --abbrev-ref HEAD)" != "$ORIG_BRANCH" ] \
-    && git checkout -q "$ORIG_BRANCH" 2>/dev/null \
-    && echo "[research] restored branch $ORIG_BRANCH"
-  rm -f "$SUMMARY"
-  exit "$rc"
-}
-trap restore_branch EXIT
-
-if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
-  git checkout -q "$BRANCH" || exit 1
-elif git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
-  git checkout -q -b "$BRANCH" "origin/$BRANCH" || exit 1
-else
-  git checkout -q -b "$BRANCH" "origin/$BASE" 2>/dev/null \
-    || git checkout -q -b "$BRANCH" || exit 1
 fi
 
 # shellcheck disable=SC2086
 git add $COMMIT_PATHS 2>/dev/null
 git commit -q -m "chore(research): $COMP daily fetch $DATE [launchd]" || {
-  echo "[research] nothing staged after checkout"
+  echo "[research] nothing staged"
   exit "$FETCH_RC"
 }
 git push -q -u origin "$BRANCH" || { echo "[research] push failed (commit is local)"; exit 1; }
