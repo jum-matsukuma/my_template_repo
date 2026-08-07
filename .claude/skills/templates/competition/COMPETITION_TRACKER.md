@@ -3,6 +3,11 @@
 初期に埋めて、以後ほとんど変わらない情報。**推測を書かず、原文で確認したものだけ**を書く。
 確認元（Overview / Data / Rules のどのページか）を併記する。
 
+**このファイルに書かないもの**: リーダーボード動向・公開 notebook の分析・
+手法のトレンドは [existing-solutions.md](existing-solutions.md) に書く。
+ここを「動かない情報」専用に保つのは、締切と提出制約を間違えると失格に直結するから。
+毎週書き換わる情報と同居させると、その中に埋もれる。
+
 ## 概要
 
 - **URL**: https://www.kaggle.com/competitions/<slug>

@@ -1,139 +1,68 @@
-# 実験トラッキング3層構造
+# 実験トラッキングの構成と運用
 
-Kaggleコンペティションの知見・実験結果・競合分析を効率的に管理するための3層ファイル構造。
+コンペの知見・実験結果・競合分析を、セッションをまたいで失わずに管理するための
+ファイル構成。**なぜこの分け方なのか**と**いつ何を更新するか**をここに書く。
 
-## 3つのファイルの役割
+**各ファイルの雛形（実体）は `.claude/skills/templates/competition/` にある。**
+このドキュメントに中身のテンプレを再掲しない — 二重に持つと必ず片方が古くなる。
 
-| ファイル | 内容 | 更新方式 | 更新頻度 |
-|---------|------|---------|---------|
-| `SKILL.md` | 現在のベストパラメータ、ワークフロー、Next Steps | 置換 | 週次 |
-| `EXPERIMENT_LOG.md` | 全実験結果の履歴（バージョン、delta、教訓） | 追記 | 実験ごと |
-| `COMPETITION_TRACKER.md` | リーダーボード動向、公開ノートブック分析 | 置換 | 週次 |
-
-## ディレクトリ構成
-
-```
-.claude/skills/<competition-name>/
-├── SKILL.md                  # 現在の知識・ワークフロー（エントリーポイント）
-├── EXPERIMENT_LOG.md         # 実験履歴（追記型）
-├── COMPETITION_TRACKER.md    # リーダーボード・ノートブック分析
-├── notebook-dev-guide.md     # ノートブック開発ガイド（必要時）
-└── advanced-strategy.md      # 戦略研究（必要時）
+```bash
+cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
 ```
 
-## SKILL.md の構成（~100行、テンプレート）
+## ファイルの役割
 
-```markdown
----
-name: <competition-name>
-description: <competition>のナレッジベース
----
+| ファイル | 答える問い | 更新方式 | 更新頻度 |
+|---|---|---|---|
+| `SKILL.md` | 何のコンペで、今どこを読めばいいか | 置換 | 稀 |
+| `EXPERIMENT_LOG.md` | 何を試して、何がどうなったか | 追記 | 実験ごと |
+| `strategy-principles.md` | なぜその判断をしたか／**何を再試行してはいけないか** | 追記 | 判断のたび |
+| `COMPETITION_TRACKER.md` | 締切・評価指標・データ仕様・提出制約 | 置換 | 初期にほぼ確定 |
+| `existing-solutions.md` | 公開解法は何をしていて、我々との差はどこか | 置換 | 情報取得のたび |
+| `pipeline-runbook.md` | 実際に動かすコマンド列 | 置換 | 手順が変わったとき |
 
-# <Competition Name>
+### 分け方の理由
 
-## 概要
-- 評価指標: [metric]
-- 賞金: $XX,XXX
-- 締切: YYYY-MM-DD
-- 制約: [CPU/GPU時間、Internet制限等]
+- **不変の情報と動く情報を混ぜない。** `COMPETITION_TRACKER.md` は締切・提出制約・
+  データ仕様といった**初期に確定してほぼ動かない**ものだけを持つ。ここを間違えると
+  失格に直結するので、頻繁に書き換わる情報と同居させて事故らせない。
+  リーダーボード動向や公開 notebook の分析は `existing-solutions.md` 側
+- **効かなかった記録を独立させる。** 成功記録は自然に残るが、失敗は残さないと
+  消える。数週間後に同じことを思いつくのを防ぐのが `strategy-principles.md` の
+  失敗録。「何を試したか／どう測ったか／結果／なぜ効かなかったと考えるか」を書く。
+  最後の項目が無いと、条件を変えれば効くのか判断できない
+- **手順を散らさない。** コマンドは `pipeline-runbook.md` に集約する。
+  思い出さなくても再実行できる状態を保つ
 
-## 現在のベストモデル
-- スコア: X.XXX (Public LB)
-- 手法: [概要]
-- 主要パラメータ:
-  - param_a = value
-  - param_b = value
+## いつ何を更新するか
 
-## ワークフロー
-[現在の実行手順]
+| きっかけ | 更新先 |
+|---|---|
+| 実験を1本回した | `EXPERIMENT_LOG.md` に追記 |
+| 施策が効かなかった | `EXPERIMENT_LOG.md` ＋ **失敗録に1行転記** |
+| 判断の前提が実測で覆った | `strategy-principles.md`（覆した経緯ごと残す） |
+| LB／公開 notebook を確認した | `existing-solutions.md` |
+| 締切・提出制約・データ仕様が変わった | `COMPETITION_TRACKER.md` |
+| ベスト構成・次の一手が変わった | `SKILL.md` の要点 |
+| 実行手順が変わった | `pipeline-runbook.md` |
 
-## Next Steps（優先度順）
-1. **[改善案A]** — 根拠、期待改善幅
-2. **[改善案B]** — 根拠、期待改善幅
-3. **[改善案C]** — 根拠、期待改善幅
+`/kaggle-update` と `/kaggle-research` の出力もこの表に従って振り分ける。
 
-## Deprecated（採用しなかったアプローチ）
-- [approach]: [理由]
+## 書き方の原則
 
-Last updated: YYYY-MM-DD
-```
+- **数値には出所を書く。** CV か LB か、fold 構成は何か。出所のない数値は
+  後で検証できないまま意思決定に引用される
+- **相対日付を書かない。** 「先週」は後で読むと意味が壊れる。`2026-08-08` と書く
+- **外部の自己申告値をベンチマークにしない。** 比較対象は自分で走らせて測る
+- **棄却した実験こそ、どう測って棄却したかを残す**
 
-## EXPERIMENT_LOG.md の構成（追記型）
+## アーカイブ
 
-```markdown
-# Experiment Log
+`EXPERIMENT_LOG.md` が肥大化したら（目安 1000 行）:
 
-## vX.Y: [実験名] (YYYY-MM-DD)
+- 直近 20 件をログに残す
+- 古いものは `EXPERIMENT_LOG-archive-<期間>.md` へ移す
+- **結論は `strategy-principles.md` に集約されている状態を保つ** —
+  アーカイブしても失敗録から消さない
 
-**変更内容**: [パラメータ変更の詳細]
-
-**結果**:
-| 指標 | 前バージョン | 今回 | Delta |
-|------|------------|------|-------|
-| Val Score | X.XXXX | X.XXXX | +/-X.XXXX |
-| Public LB | X.XXX | X.XXX | +/-X.XXX |
-
-**項目別変化**:
-- 改善: [item (+delta)]
-- 悪化: [item (-delta)]
-
-**教訓**: [何が効いた/効かなかったか]
-**次に試すべき**: [次の実験候補]
-
----
-(以降、過去の実験が続く)
-```
-
-## COMPETITION_TRACKER.md の構成
-
-```markdown
-# Competition Tracker
-
-Last updated: YYYY-MM-DD
-
-## リーダーボード
-| 順位 | チーム | スコア | 前回比 |
-|------|--------|--------|--------|
-
-## 注目ノートブック
-1. **[タイトル]** — 手法概要、スコア
-
-## 手法分類
-| 手法 | スコア範囲 | 代表的チーム |
-|------|-----------|-------------|
-
-## トレンド
-- [最近の動向メモ]
-```
-
-## 更新ルール
-
-### いつ何を更新するか
-
-1. **実験を実行した後** → `EXPERIMENT_LOG.md` に追記
-2. **リーダーボードに大きな変動** → `COMPETITION_TRACKER.md`
-3. **新しい重要なノートブック公開** → `COMPETITION_TRACKER.md`
-4. **重要なテクニック採用決定** → `SKILL.md` の Next Steps に追加
-5. **ベストスコア更新** → `SKILL.md` の現在のベストモデルを更新
-
-### アーカイブ
-
-SKILL.md が肥大化した場合:
-
-```
-docs/archive/<competition-name>/
-├── YYYY-MM-DD_archived_content.md
-└── ...
-```
-
-**SKILL.md に残す**: 現在のベスト、Next Steps、直近の重要情報
-**アーカイブ**: 実装済みテクニック詳細、古い分析、不採用アプローチ詳細
-
-## 更新フロー（3層ファイルの運用）
-
-| 操作 | タイミング |
-|------|-----------|
-| EXPERIMENT_LOG.md への記録 | 実験を1本回すたびに追記（スコア・delta・教訓） |
-| COMPETITION_TRACKER.md の更新 | リーダーボード/公開ノートブックを確認したとき置換更新 |
-| SKILL.md の更新 | ベストパラメータ・Next Steps が変わったとき置換更新 |
-| 全体の分析・仮説生成 | サイクルの区切りで EXPERIMENT_LOG を読み返してパターン抽出 |
+`SKILL.md` は常に 100 行以内のインデックスに保ち、詳細は各ファイルへ送る。

@@ -1,6 +1,6 @@
 # コンペ用スキル雛形
 
-新しい Kaggle コンペを始めるときにコピーする 5 ファイル構成。
+新しい Kaggle コンペを始めるときにコピーする構成（6 ファイル + この README）。
 
 ```bash
 cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
@@ -13,7 +13,10 @@ cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
 **コピー先（`.claude/skills/<slug>/`）で解決するように書いてある**。
 このディレクトリで直接開くとリンク切れに見えるが、コピーすれば正しく繋がる。
 
-## なぜこの 5 ファイルなのか
+**この README 自体はコピー先では不要**なので消してよい
+（雛形の使い方の説明であって、コンペのコンテキストではない）。
+
+## なぜこの分け方なのか
 
 コンペは数週間から数ヶ月続き、その間セッションは何度も切れる。
 **次に再開する自分（あるいは文脈をまったく持たない後続セッション）が、
@@ -24,18 +27,10 @@ cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
 | `SKILL.md` | 何のコンペで、今どこを読めばいいか | 稀 |
 | `EXPERIMENT_LOG.md` | 何を試して、何がどうなったか | 実験ごと |
 | `strategy-principles.md` | なぜその判断をしたか / **何を再試行してはいけないか** | 判断のたび |
-| `COMPETITION_TRACKER.md` | 締切・評価指標・データ仕様・提出制約 | 初期にほぼ確定 |
+| `COMPETITION_TRACKER.md` | 締切・評価指標・データ仕様・提出制約（動かない情報） | 初期にほぼ確定 |
+| `existing-solutions.md` | 公開解法・リーダーボード動向・我々との差 | 情報取得のたび |
 | `pipeline-runbook.md` | 実際に動かす手順（コマンド列） | 手順が変わったとき |
 
-## 運用で効くこと
-
-- **SKILL.md は 100 行以内のインデックスに保つ。** 中身は個別ファイルへ
-- **失敗録（再試行禁止リスト）を必ず書く。** 「試して効かなかった」は
-  成功記録より価値がある。書いていないと 3 週間後に同じことを試す
-- **相対日付を書かない。** 「先週」は後で読むと意味が壊れる。`2026-08-07` と書く
-- **数値には出所を書く。** CV なのか LB なのか、どの fold 構成か。
-  出所のない数値は後で検証できず、そのまま意思決定に引用される
-- 詳細は `.claude/skills/kaggle/experiment-tracking.md`
-
-なお、**この README 自体はコピー先では不要**なので消してよい
-（雛形の使い方の説明であって、コンペのコンテキストではない）。
+**役割の分け方と更新ルールの本体は `.claude/skills/kaggle/experiment-tracking.md`
+にある。** ここには再掲しない — 同じ規約を2箇所に置くと必ず片方が古くなる。
+（この README はコピー先では消す前提なので、相対リンクではなくパスで書いている）

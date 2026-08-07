@@ -201,7 +201,7 @@ project-root/
 │       ├── kaggle/     # Kaggle competition skills
 │       │   └── SKILL.md
 │       └── templates/  # Skill templates (technology-stack, custom-tools,
-│           └── competition/   #  project-domain, competition 5ファイル雛形)
+│           └── competition/   #  project-domain, competition 雛形)
 ├── kaggle-template/    # Kaggle competition template
 │   └── scripts/kaggle_research.py   # 公開情報の差分取得（公式CLI）
 └── README.md           # Project overview
@@ -225,7 +225,8 @@ cd my-competition/
 uv sync --extra kaggle
 ```
 
-セットアップ・Colab連携（GPU実行）・実験トラッキング（SKILL.md / EXPERIMENT_LOG.md / COMPETITION_TRACKER.md の3層構造）の詳細は `.claude/skills/kaggle/SKILL.md` とその支援ファイルを参照。
+セットアップ・Colab連携（GPU実行）・実験トラッキングの構成と更新ルールは `.claude/skills/kaggle/experiment-tracking.md`、
+ファイルの実体は `.claude/skills/templates/competition/` を参照。
 
 新しいコンペを始めるときは、コンペ用スキルの雛形をコピーする:
 

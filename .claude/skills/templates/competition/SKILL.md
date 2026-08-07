@@ -18,7 +18,7 @@ description: <コンペ名> のコンテキスト。<タスク種別・ドメイ
   新しい施策を思いついたら、まず「試して死んだこと」を確認する
 - [pipeline-runbook.md](pipeline-runbook.md) — 運用ランブック（定型コマンド・提出手順）
 - [COMPETITION_TRACKER.md](COMPETITION_TRACKER.md) — 概要・評価指標・データ仕様・提出制約・締切
-- [existing-solutions.md](existing-solutions.md) — 公開 notebook / discussion の要点
+- [existing-solutions.md](existing-solutions.md) — 公開解法の要点・**リーダーボード動向**・我々との差の分解
 
 ## 要点（30 秒サマリ）
 

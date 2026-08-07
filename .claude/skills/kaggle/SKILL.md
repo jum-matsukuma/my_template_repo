@@ -36,9 +36,9 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 - [notebook-development-guide.md](notebook-development-guide.md) - Colab/Kaggle デュアル環境ノートブック開発ガイド
 
 ### Competition Workflow
-- [experiment-tracking.md](experiment-tracking.md) - 実験トラッキング3層構造パターン
+- [experiment-tracking.md](experiment-tracking.md) - **実験トラッキングの構成と運用ルール**（どのファイルに何を書くか。雛形の実体は templates/competition/）
 - [solution-strategy.md](solution-strategy.md) - 競技フェーズ別の戦略・リソース配分
-- [../templates/competition/](../templates/competition/) - **コンペ用スキル雛形（5 ファイル）**。新規コンペ開始時にコピーする
+- [../templates/competition/](../templates/competition/) - **コンペ用スキル雛形**。新規コンペ開始時にコピーする
 - [../../ops/README.md](../../ops/README.md) - 日次の自動取得ジョブ（launchd → draft PR）
 
 ### ML Reference
