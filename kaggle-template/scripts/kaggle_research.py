@@ -139,8 +139,14 @@ def safe_name(ref: str) -> str:
 # --------------------------------------------------------------------------
 # discussion topics
 # --------------------------------------------------------------------------
-def list_all_topics(comp: str, max_pages: int = 60, sleep: float = 0.5) -> dict:
-    """Page through EVERY discussion topic. This is the default on purpose."""
+def list_all_topics(comp: str, max_pages: int = 60, sleep: float = 0.5):
+    """Page through EVERY discussion topic. This is the default on purpose.
+
+    Returns (topics, error). A non-None error means enumeration stopped early --
+    auth, rate limit, network -- so the caller is holding a PARTIAL list. That
+    has to be reported: silently returning what we happened to collect would let
+    the daily job mark a run successful while whole pages went unseen.
+    """
     seen: dict[str, dict] = {}
     for page in range(1, max_pages + 1):
         rows, err = kaggle_json(
@@ -148,7 +154,7 @@ def list_all_topics(comp: str, max_pages: int = 60, sleep: float = 0.5) -> dict:
         )
         if rows is None:
             print(f"  ! topics list page {page}: {err}", file=sys.stderr)
-            break
+            return seen, f"topic enumeration stopped at page {page}: {err}"
         if not rows:
             break
         before = len(seen)
@@ -162,22 +168,24 @@ def list_all_topics(comp: str, max_pages: int = 60, sleep: float = 0.5) -> dict:
         if len(rows) < 20:
             break
         time.sleep(sleep)
-    return seen
+    return seen, None
 
 
-def list_top_topics(comp: str, n: int) -> dict:
+def list_top_topics(comp: str, n: int):
     """Opt-in fast path: only the top-N. Leaves a blind spot by construction."""
     seen: dict[str, dict] = {}
+    errs = []
     for sort in ("top", "new"):
         rows, err = kaggle_json(["competitions", "topics", "list", comp, "-s", sort])
         if rows is None:
             print(f"  ! topics list ({sort}): {err}", file=sys.stderr)
+            errs.append(f"topics list ({sort}): {err}")
             continue
         for r in rows[:n]:
             tid = str(r.get("id") or "")
             if tid:
                 seen.setdefault(tid, r)
-    return seen
+    return seen, ("; ".join(errs) if errs else None)
 
 
 def fetch_topic(tid: str, dest: Path) -> tuple[dict | None, str | None]:
@@ -465,11 +473,15 @@ def main() -> int:
 
     # ---- enumerate discussion topics (ALL of them, by default) ----
     print(f"enumerating topics for {a.comp} ...")
-    topics = (
+    topics, enum_err = (
         list_top_topics(a.comp, a.top_topics)
         if a.top_topics
         else list_all_topics(a.comp)
     )
+    if enum_err:
+        # Loud, and fatal to the run's exit status: everything downstream is
+        # computed against a list we know is incomplete.
+        errors.append(enum_err)
     print(f"  {len(topics)} topics visible on Kaggle, {len(m_tp)} tracked in manifest")
 
     missing = sorted(set(topics) - set(m_tp))
