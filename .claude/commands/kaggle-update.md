@@ -113,39 +113,40 @@ uv run kaggle kernels pull <kernel-ref> -p data/kaggle_notebooks/<notebook-name>
 uv run kaggle competitions submissions <competition-name>
 ```
 
-### 4. ディスカッション
-Playwright ベースのスクレイパーで全ディスカッション + コメントを取得:
+### 4. ディスカッション・notebook・コメント・writeup
+公式 Kaggle CLI で差分取得する（Playwright は不要）:
 ```bash
-# 増分更新（推奨: 新規・更新トピックのみ取得、~1-2分）
-uv run python scripts/fetch_discussions.py --competition <competition-name> --update --delay 10.0
+# 差分取得（既定で全スレッドを列挙する）
+python3 scripts/kaggle_research.py --comp <competition-name> --out research
 
-# 初回フル取得（全トピック、~50-60分）
-uv run python scripts/fetch_discussions.py --competition <competition-name> --delay 10.0
+# 取りこぼしの監査だけ行う（取得はしない）
+python3 scripts/kaggle_research.py --comp <competition-name> --out research --audit
 
-# トピック一覧のみ（高速）
-uv run python scripts/fetch_discussions.py --competition <competition-name> --topics-only
-
-# 中断再開
-uv run python scripts/fetch_discussions.py --competition <competition-name> --resume --delay 10.0
+# 初回や再取得
+python3 scripts/kaggle_research.py --comp <competition-name> --out research --full
 ```
 
-**出力先**: `docs/discussions/`
+**出力先**: `research/`
 ```
-docs/discussions/
-├── topic_list.json          # トピック一覧メタデータ
-├── discussions_full.json    # 全トピック詳細 + コメント
-├── INDEX.md                 # Markdown インデックス
-└── markdown/                # トピック別 .md ファイル
+research/
+├── manifest.json        # 差分検出の状態（取得済み件数・writeup の SHA・エラー）
+├── discussions/<id>.json    # 本文 + コメント全文
+├── notebooks/<ref>/         # notebook ソース（gitignore 推奨: 他人の著作物）
+├── kernel_comments/<ref>.json
+└── writeups/<user>__<slug>.md
 ```
 
 **注意事項**:
-- 初回は `--delay 10.0` を推奨（Kaggle レートリミット対策）
-- `--update` は前回の `discussions_full.json` の `fetchedAt` を基準に差分検出
-- Playwright + Chromium が必要: `uv sync --extra kaggle && uv run playwright install chromium`
-- スクリプト詳細・内部 API の仕組みは `.claude/skills/kaggle/kaggle-scraping.md` を参照
+- Kaggle CLI 2.2 以上が必要（`kernels topics` を使うため）。`kaggle --version` で確認
+- **`--top-topics N` は既定では使わない。** 上位 N のみの取得は恒久的な盲点を作る
+- 実行後は必ず **warnings 欄**を見る。`fetched X of Y comments` は
+  取りこぼしのサイン（削除済みコメントによる 1 件差は正常）
+- writeup 本文のみ外部リーダー (r.jina.ai) を経由する。検知は CLI だけで完結する
+- 手段の詳細と落とし穴は `.claude/skills/kaggle/kaggle-scraping.md` を参照
+- 日次自動化は `.claude/ops/README.md`（差分を draft PR で出す）
 
 **取得後のアクション**:
-1. `docs/discussions/INDEX.md` を読んで新しいトピックを確認
+1. 新規トピック・新規/更新 writeup をサマリで確認
 2. 重要な知見は `COMPETITION_TRACKER.md` に反映
 3. 採用候補のテクニックは `SKILL.md` の Next Steps に追加
 

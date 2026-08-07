@@ -26,7 +26,9 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 
 ### Setup and Tools
 - [kaggle-api-setup.md](kaggle-api-setup.md) - Kaggle API installation and authentication guide
-- [kaggle-scraping.md](kaggle-scraping.md) - Playwright スクレイピング + discussion 一括取得スクリプト
+- [kaggle-scraping.md](kaggle-scraping.md) - 公開情報の取得（notebook/discussion/コメント/writeup）。**公式 CLI が正、Playwright は不要**
+- [kaggle-gpu-kernels.md](kaggle-gpu-kernels.md) - GPU カーネルの実務（P100 非互換・12h 強制 CANCEL・週 30h クォータ・slug 汚染）
+- [long-running-jobs.md](long-running-jobs.md) - 1 時間超のジョブと定期実行の扱い方
 - [colab-workflow.md](colab-workflow.md) - Google Colab + Claude Code development workflow（Drive 構成・チェックポイント戦略。実行は colab スキル推奨）
 - [../colab/SKILL.md](../colab/SKILL.md) - Colab CLI / MCP による実行（GPU/TPU ヘッドレス実行・ノートブックのライブ操作）
 - [claude-friendly-outputs.md](claude-friendly-outputs.md) - Creating outputs Claude can review locally
@@ -36,6 +38,8 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 ### Competition Workflow
 - [experiment-tracking.md](experiment-tracking.md) - 実験トラッキング3層構造パターン
 - [solution-strategy.md](solution-strategy.md) - 競技フェーズ別の戦略・リソース配分
+- [../templates/competition/](../templates/competition/) - **コンペ用スキル雛形（5 ファイル）**。新規コンペ開始時にコピーする
+- [../../ops/README.md](../../ops/README.md) - 日次の自動取得ジョブ（launchd → draft PR）
 
 ### ML Reference
 - [data-understanding.md](data-understanding.md) - データセット分析・特徴量ドキュメントテンプレート

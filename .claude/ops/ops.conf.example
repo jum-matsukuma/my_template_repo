@@ -1,0 +1,45 @@
+# Ops configuration for the unattended daily jobs.
+#
+#   cp ops.conf.example ops.conf     # ops.conf is gitignored: it holds machine paths
+#
+# Every job script sources this file. Nothing here is competition-specific until
+# you fill it in, which is what makes the harness reusable across competitions.
+
+# Absolute path to the repository the jobs operate on. launchd starts with an
+# empty environment and no working directory, so this cannot be relative.
+REPO="/absolute/path/to/your-competition-repo"
+
+# Kaggle competition slug (the URL suffix).
+COMP="your-competition-slug"
+
+# Prefix for LaunchAgent labels and branch names. Keep it short and unique per
+# competition so two competitions on one machine never collide.
+PREFIX="mycomp"
+
+# Where kaggle_research.py writes. Relative to REPO.
+OUT_DIR="research"
+
+# Last day the jobs should run, YYYY-MM-DD. Past this date the runner
+# self-uninstalls its LaunchAgents. Set it a couple of days after the
+# competition deadline -- an unattended job that outlives its purpose is a
+# machine you have to remember to clean up, and you will not remember.
+STOP_DATE="2099-12-31"
+
+# Paths committed when the fetch finds a diff, space-separated, relative to REPO.
+#
+# Deliberately excludes research/notebooks/: that is other people's source code,
+# and redistributing it through your repository is a licensing question you do
+# not want to answer by accident. Discussion text and writeups are included
+# because the whole point of the job is to make their changes reviewable in a
+# diff -- if that is too much for your situation, drop them here and keep only
+# the manifest, which still records that something changed.
+COMMIT_PATHS="research/discussions research/writeups research/kernel_comments research/manifest.json"
+
+# Extra flags for kaggle_research.py. Leave empty for full enumeration, which
+# is the safe default. --top-topics N is faster but builds a permanent blind
+# spot; see the script's docstring before reaching for it.
+FETCH_ARGS=""
+
+# Optional: raises the r.jina.ai rate limit for writeup body fetches.
+# Leave unset to use the keyless tier. Never commit a real key.
+# JINA_API_KEY=""

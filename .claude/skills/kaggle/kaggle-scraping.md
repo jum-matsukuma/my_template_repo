@@ -1,157 +1,108 @@
-# Kaggle ページスクレイピング（Playwright）
+# Kaggle 公開情報の取得
 
-KaggleはJavaScript SPAのため、`WebFetch` ではページ内容を取得できない。
-`playwright` を使ってブラウザレンダリング後のテキストを取得する。
+**結論から: notebook・discussion・コメントは公式 Kaggle CLI で全部取れる。Playwright は要らない。**
 
-## 前提
+かつては Kaggle が JS SPA であることを理由にブラウザレンダリングが必須だったが、
+CLI 2.2 以降は背後の API を正式に叩ける。実測で確認済み（下表）。
+唯一の例外は **writeup 本文**で、ここだけレンダラが要る。
 
-```bash
-uv sync --extra kaggle          # playwright が含まれる
-uv run playwright install chromium
-```
+## 取得対象 × 手段（実測済み）
 
-## 基本パターン
-
-```python
-from playwright.sync_api import sync_playwright
-
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    page = browser.new_page()
-
-    url = "https://www.kaggle.com/competitions/COMP_NAME/overview"
-    page.goto(url, wait_until="networkidle", timeout=30000)
-    page.wait_for_timeout(5000)  # JS レンダリング待ち
-
-    content = page.inner_text("body")
-    # content は長いので分割して読む
-    print(content[:10000])
-    # print(content[10000:20000])  # 続き
-
-    browser.close()
-```
-
-## 取得対象別 URL
-
-| タブ | URL パス |
-|------|---------|
-| Overview | `/competitions/COMP_NAME/overview` |
-| Rules | `/competitions/COMP_NAME/rules` |
-| Data | `/competitions/COMP_NAME/data` |
-| Discussion | `/competitions/COMP_NAME/discussion` |
-| Leaderboard | `/competitions/COMP_NAME/leaderboard` |
-| Notebook | `/code/USER/NOTEBOOK_NAME` |
-
-## 注意事項
-
-- **認証不要**: 公開ページはログインなしで取得可能
-- **出力が長い**: `body` のテキストは数万文字になるため、`content[start:end]` でスライスして読む
-- **タイムアウト**: `wait_until="networkidle"` + `wait_for_timeout(5000)` でほぼ確実にレンダリング完了
-- **Kaggle API で取れるもの**: ファイル一覧、リーダーボード、ノートブックダウンロードは API の方が効率的
-- **Playwright が必要な場面**: Overview、Rules、Evaluation の本文テキスト、Discussion の内容
-
----
-
-## Discussion 一括取得スクリプト
-
-`kaggle-template/scripts/fetch_discussions.py` で competition の全 discussion（トピック一覧 + 各トピックのコメント）を取得できる。
-
-Kaggleコンペ用プロジェクトではテンプレートをコピーした時点でスクリプトも使える:
-
-```bash
-cp -r kaggle-template/ my-competition/
-cd my-competition/
-uv sync --extra kaggle
-uv run playwright install chromium
-```
-
-### 仕組み
-
-Kaggle は Discussion の公開 API を提供していない。内部 API を以下の方法で利用:
-
-1. **トピック一覧**: Playwright で cookie 取得 → `requests` で内部 API を直接呼び出し（高速）
-2. **トピック詳細**: Playwright でページを個別訪問し、`GetForumTopicById` レスポンスをインターセプト
-
-内部 API エンドポイント（`/api/i/discussions.DiscussionsService/`）:
-
-| エンドポイント | 用途 | 認証 |
+| 取得対象 | コマンド | 状態 |
 |---|---|---|
-| `GetForum` | フォーラム ID 取得 | 不要 |
-| `GetTopicListByForumId` | トピック一覧（ページネーション） | 不要 |
-| `GetForumTopicById` | トピック詳細 + コメント | **ブラウザコンテキスト必須** |
+| notebook ソース | `kaggle kernels pull <ref> -p <dir>` | ✅ |
+| notebook 一覧 | `kaggle kernels list --competition <slug> -p N --page-size 50 --csv` | ✅ 全ページ列挙可 |
+| discussion 一覧 | `kaggle competitions topics list <slug> -p N -s new --format json` | ✅ 全ページ列挙可 |
+| discussion 本文+コメント | `kaggle competitions topics show <id> --format json` | ✅ 切り詰めなし |
+| **kernel コメント** | `kaggle kernels topics list <ref>` → `kaggle kernels topics show <topic_id>` | ✅ |
+| **writeup 本文** | ❌ CLI に存在しない | → r.jina.ai |
 
-`GetForumTopicById` は `requests` からの直接呼び出しでは 404 を返す（Kaggle がブラウザコンテキストを検証）。
-そのため Playwright でのページ訪問が必要。
+これらは `kaggle-template/scripts/kaggle_research.py` に実装済み。
+個別に叩く前にまずそれを使うこと。
 
-### 使い方
+## 落とし穴（すべて実害があったもの）
+
+### 1. `--format json` を必ず付ける
+
+プレーン出力は**コメント本文を切り詰める**。同一スレッドで実測すると
+プレーン 2253 バイト / JSON 4522 バイト。JSON なら 1700 字級の本文も完全に返る。
+
+### 2. `kernels topics` の存在を忘れない
+
+kernel のコメントは `kagglesdk` の `list_comments` を直接叩いても取れるが、
+**返信ツリーを辿らないので大幅に取りこぼす**。実測: 同一 notebook で
+kagglesdk 3 件 / CLI 10 件。コンペ全体では kagglesdk 経由で 1050 notebook から
+15 件しか拾えず、実際には 64 件以上あった。
+
+`kernels topics show` は "all its comments in tree form" を返す。こちらを使う。
+
+### 3. 件数を必ず自己検証する
+
+`commentCount`（Kaggle の申告）と実際に取得できた件数を毎回照合すること。
+上の取りこぼしは**何のエラーも出さずに起きた**。差分が出たら記録して人間に見せる。
+削除済みコメントによる 1 件差は正常。
+
+### 4. 上位 N 件だけ取ると盲点が恒久化する
+
+ソート上位 N のみを取得して manifest に記録する設計だと、**差分取得は
+「manifest にあるものの更新」しか見ない**ため、初回に外れたものは二度と現れない。
+実例: 158 スレッド中 43 件しか追跡しておらず、上位陣との差を説明する情報が
+見落とし側にあった。**全ページ列挙を既定にする。**
+
+### 5. レートリミット
+
+60 件を超える連続取得で 429 が出る。トピック取得の間に 4 秒、
+Jina 経由は 6 秒空ける。
+
+## writeup — 唯一レンダラが要る対象
+
+CLI に writeup サブコマンドは無い（`competitions pages` は overview 系のみ）。
+生 `curl` は 8.7KB の JS シェルしか返さず本文は入っていない。
+
+**ただし発見（discovery）は CLI だけでできる。** writeup の URL は discussion
+本文に貼られるので、取得済み discussion コーパスを正規表現で走査すれば
+新規 writeup を検知できる。実測: 1 スレッドから 22 本の URL を抽出。
+
+したがって:
+
+- **検知は CLI 由来**（外部依存ゼロ・無人ジョブでも静かに失敗しない）
+- **本文取得のみ** `https://r.jina.ai/<url>` を使う
 
 ```bash
-# 全 discussion 取得（初回）
-uv run python scripts/fetch_discussions.py --competition <slug> --delay 10.0
-
-# 差分更新（前回以降の新規・更新トピックのみ取得）
-uv run python scripts/fetch_discussions.py --competition <slug> --update --delay 10.0
-
-# コメント未取得分だけ再取得（中断からの復帰）
-uv run python scripts/fetch_discussions.py --competition <slug> --resume --delay 10.0
-
-# トピック一覧だけ取得（高速、数十秒）
-uv run python scripts/fetch_discussions.py --competition <slug> --topics-only
-
-# 件数制限（テスト用）
-uv run python scripts/fetch_discussions.py --competition <slug> --limit 5 --delay 5.0
+curl -s -m 120 -H "x-no-cache: true" "https://r.jina.ai/https://www.kaggle.com/writeups/<user>/<slug>"
 ```
 
-`--competition` を省略したい場合は、スクリプト先頭の `DEFAULT_COMPETITION` を書き換える。
+`x-no-cache: true` を付けないとリーダー側のキャッシュを掴む。
+`JINA_API_KEY` があれば `Authorization: Bearer` で渡すとレート制限が緩む。
 
-### 出力先
+**404 は本文に埋め込まれて返る。** リーダーは HTTP 200 を返しつつ本文に
+`Warning: Target URL returned error 404` と書く。これを見ないと、削除された
+writeup の 400 バイトの Cookie バナーを「取得成功」として保存してしまう
+（実際にそうなっていた事例あり）。
 
-`docs/discussions/` に出力される:
+### 外部サービスを使うことの評価
 
-```
-docs/discussions/
-├── topic_list.json          # 全トピックのメタデータ（タイトル、著者、投票数等）
-├── discussions_full.json    # 全トピック詳細 + コメント（JSON）
-├── INDEX.md                 # 一覧インデックス
-└── markdown/                # 各トピックの個別 Markdown ファイル
-    ├── 687017_Nemotron-Cascade-....md
-    ├── 680552_Apply here for ....md
-    └── ...
-```
+送るのは URL のみで、対象は公開ページなので内容の機密性は無い。ただし
+**「どのコンペの何を調べているか」は第三者のログに残る**。開催中コンペでは
+これを踏まえて判断すること。使用面を writeup だけに絞れば曝露は最小化できるし、
+無人ジョブのクリティカルパスから外れるので可用性リスクも消える。
 
-### Rate Limit 対策
+## 公式 CLI と Jina が両方使えなくなったら
 
-Kaggle は動的 rate limit を適用する。以下の知見に基づいて設計:
+この節は「二度と Playwright を書かなくて済むように」ではなく、
+**本当に必要になった時に一から調べ直さなくて済むように**残してある。
 
-| パラメータ | 推奨値 | 説明 |
-|---|---|---|
-| `--delay` | **10.0** | ページ間の待機秒数。10秒で 298 件取得時に rate limit 回避を確認 |
-| API throttle | 0.5秒/リクエスト（固定） | 1 ページロードで ~17 件の内部 API が発火。各リクエストに 0.5 秒の遅延を挿入 |
-| トピック一覧 | 1.0秒/ページ（固定） | 20件/ページ × 15ページ程度 |
+- Kaggle の内部エンドポイントは `https://www.kaggle.com/api/i/<Service>`
+  （例: `discussions.DiscussionsService`）。**バージョン無しで予告なく変わる**
+- 内部エンドポイントの多くは**ブラウザコンテキストを検証する**ので、`requests`
+  だけでは通らずページ遷移が要る。これが当初 Playwright を導入した理由
+- 旧実装（Playwright + 内部 API、490 行）は git 履歴にある。
+  `git log --all --diff-filter=D -- '*fetch_discussions.py'` で SHA を出し、
+  `git show <sha>:kaggle-template/scripts/fetch_discussions.py` で読める
+- **ただし取りこぼしの前科がある実装なので、復活させるより
+  レンダリング済みページを取りに行く方が筋が良い**
 
-- **1 ページあたりの負荷**: HTML 1 + JS/CSS ~4 + 内部 API ~17 = **約 22 リクエスト**
-- `--delay 10.0` での所要時間: 約 **50-60 分**（~170 件未取得時）
-- `--delay 5.0` でも動く可能性はあるが、rate limit リスクが上がる
-- rate limit に引っかかった場合: **数十分〜数時間待つ必要がある**（UI でもページが見れなくなる）
+## 認証
 
-### `--update` の動作（差分更新）
-
-`discussions_full.json` の `fetchedAt` タイムスタンプを基準に差分を検出:
-
-- **新規トピック**: `topic_list` にあるが `discussions_full.json` にないもの
-- **更新トピック**: `lastCommentPostDate` が `fetchedAt` 以降のもの（新しいコメントが付いた）
-
-変更のあったトピックだけ Playwright で再取得し、既存データにマージする。
-新規2件 + 更新3件 なら約1分で完了（フル取得の50分と比較して大幅に高速）。
-
-### `--resume` の動作
-
-- `discussions_full.json` からコメント付きトピックをキャッシュとして読み込む
-- コメント 0 件のトピックは再取得対象（前回 rate limit で取得失敗した可能性）
-- トピック一覧の取得に失敗した場合、`topic_list.json` からフォールバック
-
-### 外部リクエストのブロック
-
-スクリプトは Playwright の route 機能で外部サービス（Google Analytics, fonts 等）をブロックし、
-Kaggle への不要なリクエストを削減している。
-**Kaggle 内部 API はブロックしてはいけない**（SPA の初期化に必要で、ブロックすると `GetForumTopicById` が発火しない）。
+`kaggle-api-setup.md` を参照。CLI は 2.2 以上が必要
+（`kernels topics` は 2.2 で入った）。`kaggle --version` で確認すること。

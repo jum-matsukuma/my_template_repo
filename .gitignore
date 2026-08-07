@@ -96,3 +96,16 @@ models/
 
 # Archives
 docs/archive/
+
+# Kaggle research cache. Other people's notebook source is NOT committed --
+# redistributing it through your repo is a licensing question you do not want
+# to answer by accident. Discussion text, writeups and the manifest are left
+# committable so the daily job can surface their changes as a reviewable diff.
+research/notebooks/
+
+# Ops runtime state (machine-local; the templates and scripts stay versioned)
+.claude/ops/ops.conf
+.claude/ops/logs/
+.claude/ops/locks/
+.claude/ops/.state-*
+.claude/ops/groundtruth.json
