@@ -190,11 +190,36 @@ CLI. Flags, output layout and the traps that cost real information live in
 **`.claude/commands/kaggle-research.md`** (how to run it) and
 **`.claude/skills/kaggle/kaggle-scraping.md`** (why, and what breaks).
 
-### Unattended daily fetch (optional)
+### Japanese translations, for humans only
 
-`.claude/ops/` runs that fetch on a schedule via launchd and publishes each day's
-diff as a **draft PR**. Opt-in — nothing is scheduled until you create `ops.conf`
-and run `install.sh`. Setup, safety properties and teardown are in
+```bash
+python3 scripts/research_ja.py prep  --comp <slug> --out research --docs docs/research-ja
+python3 scripts/research_ja.py index --comp <slug> --out research --docs docs/research-ja
+python3 scripts/research_ja.py html  --out research --docs docs/research-ja --dest ~/Downloads/ja
+```
+
+Renders the selected threads to markdown, downloads their figures, glues the reply
+thread onto the end of the body, and hands one document at a time to a translating
+agent. Output is a full translation — not a summary — with the figures in their
+original positions and a browsable HTML export.
+
+The two corpora are kept apart on purpose: agents read the English
+(`research/rendered/`), humans read the Japanese (`docs/research-ja/`), and
+`.claude/settings.json` puts the Japanese side behind an **`ask` rule**, so an agent
+reaching for a translation on its own initiative has to surface that decision to you
+first — and an unattended run, having nobody to ask, is refused outright.
+A translation is a lossy derivative; an agent that cites one silently substitutes a
+translator's paraphrase for what the author wrote. See
+**`.claude/commands/research-ja.md`** (how to run it) and
+**`.claude/skills/kaggle/research-ja-translation.md`** (why, and what breaks).
+
+### Unattended daily jobs (optional)
+
+`.claude/ops/` runs the fetch, the translation and a documentation fact-check on a
+schedule via launchd, publishing each day's diff as a **draft PR**. Opt-in —
+nothing is scheduled until you create `ops.conf` and run `install.sh`, and the
+translate job additionally needs `TRANSLATE_ENABLED=1` because it is the only one
+that spends model tokens per document. Setup, safety properties and teardown are in
 **`.claude/ops/README.md`**.
 
 ### Example Instructions for Claude Code

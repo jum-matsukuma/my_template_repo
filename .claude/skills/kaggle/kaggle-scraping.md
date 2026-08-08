@@ -112,3 +112,13 @@ writeup の 400 バイトの Cookie バナーを「取得成功」として保�
 
 `kaggle-api-setup.md` を参照。CLI は 2.2 以上が必要
 （`kernels topics` は 2.2 で入った）。`kaggle --version` で確認すること。
+
+## 日本語訳レイヤ
+
+取得した英語原文から図つきの日本語全訳を作る手順は
+[research-ja-translation.md](research-ja-translation.md) にある。
+
+重要なのは役割分担で、**エージェントが根拠にしてよいのは英語原文
+（`research/rendered/*.md`）だけ**、日本語訳（`docs/research-ja/`）は人間専用。
+訳文は `.claude/settings.json` の `permissions.ask` に入っていて、エージェントが
+自分の判断で開こうとすると確認が入る（無人実行は承認者がいないので拒否される）。

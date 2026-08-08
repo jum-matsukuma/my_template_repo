@@ -20,8 +20,11 @@ UID_N="$(id -u)"
 AGENTS="$HOME/Library/LaunchAgents"
 mkdir -p "$AGENTS" "$OPS_DIR/logs"
 
-# job:hour:minute -- stagger jobs so they never contend for the same lock.
-JOBS=("research:3:3" "factcheck:5:5")
+# The job list and the opt-in rules live in jobs.def, so install.sh,
+# uninstall.sh and run-daily.sh cannot drift apart.
+# shellcheck source=/dev/null
+source "$OPS_DIR/jobs.def"
+JOBS=("${OPS_JOBS[@]}")
 WANTED=("$@")
 
 for spec in "${JOBS[@]}"; do
@@ -30,6 +33,12 @@ for spec in "${JOBS[@]}"; do
     continue
   fi
   [ -f "$OPS_DIR/${JOB}.sh" ] || { echo "skip $JOB (no ${JOB}.sh)"; continue; }
+  # An explicitly requested job installs regardless; the gate only governs what
+  # a bare ./install.sh picks up.
+  if [ ${#WANTED[@]} -eq 0 ] && ! ops_job_enabled "$JOB"; then
+    echo "skip $JOB (disabled -- set $(echo "$JOB" | tr '[:lower:]' '[:upper:]')_ENABLED=1 in ops.conf)"
+    continue
+  fi
 
   LABEL="com.${PREFIX}.${JOB}"
   PLIST="$AGENTS/${LABEL}.plist"

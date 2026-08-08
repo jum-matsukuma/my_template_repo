@@ -193,7 +193,7 @@ project-root/
 │   ├── agents/         # Custom agent definitions
 │   │   ├── code-reviewer.md
 │   │   └── codex-reviewer.md
-│   ├── commands/       # Slash commands (/pr, /kaggle-research, /codex-review, ...)
+│   ├── commands/       # Slash commands (/pr, /kaggle-research, /research-ja, /codex-review, ...)
 │   ├── hooks/          # notify.sh / format.sh / pr-review-nudge.sh
 │   ├── ops/            # 無人の定期ジョブ (launchd → draft PR)。opt-in
 │   │   └── README.md
@@ -244,3 +244,11 @@ cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
 日次で自動取得して draft PR にする仕組みが `.claude/ops/` にある（**opt-in**、
 `ops.conf` を作って `install.sh` を実行したときだけ動く）。詳細は
 `.claude/ops/README.md`。
+
+取得した英語原文の**日本語全訳（図つき）**を作る層が `research_ja.py` と
+`.claude/ops/translate.sh`（`/research-ja`）。手順・落とし穴・分離の理由は
+`.claude/skills/kaggle/research-ja-translation.md`。
+
+> **根拠にするのは英語原文 `research/rendered/*.md`。** `docs/research-ja/` の訳文は
+> 人間向けで `permissions.ask` 付き — 自分の判断では取りに行かない（ユーザーが明示的に
+> 指示したなら承認して読んでよい）。
