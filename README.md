@@ -205,7 +205,9 @@ original positions and a browsable HTML export.
 
 The two corpora are kept apart on purpose: agents read the English
 (`research/rendered/`), humans read the Japanese (`docs/research-ja/`), and
-`.claude/settings.json` **denies Read on the Japanese side** so it stays that way.
+`.claude/settings.json` puts the Japanese side behind an **`ask` rule**, so an agent
+reaching for a translation on its own initiative has to surface that decision to you
+first — and an unattended run, having nobody to ask, is refused outright.
 A translation is a lossy derivative; an agent that cites one silently substitutes a
 translator's paraphrase for what the author wrote. See
 **`.claude/commands/research-ja.md`** (how to run it) and

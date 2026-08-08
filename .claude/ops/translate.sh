@@ -18,8 +18,10 @@
 # agent that cites it inherits a translator's paraphrase instead of what the
 # author wrote, and nothing downstream announces the substitution. So agents
 # read research/rendered/ (English), humans read docs/research-ja/ (Japanese),
-# and .claude/settings.json denies Read on the latter to make it mechanical
-# rather than a convention people remember.
+# and .claude/settings.json puts the latter behind an `ask` rule so this is
+# mechanical rather than a convention people remember. Note what that gates: an
+# agent choosing to read a translation by itself, not a human asking it to.
+# Unattended runs have no approver, so they are refused.
 set -uo pipefail
 
 # shellcheck source=/dev/null
@@ -207,7 +209,8 @@ if command -v gh >/dev/null 2>&1; then
 
 - 索引: \`$JA_DIR/README.md\`（ブラウザ版は \`$HTML_DIR/index.html\`）
 - **この訳文は人間の読者専用**。エージェントが読むのは英語原文 \`$OUT_DIR/rendered/*.md\` の方で、
-  \`.claude/settings.json\` の \`permissions.deny\` が Read をブロックしている。
+  \`.claude/settings.json\` の \`permissions.ask\` により、エージェントが自分の判断で
+  訳文を読もうとすると確認が入る（無人実行は承認者がいないので拒否）。
 - 図は \`$OUT_DIR/assets/<key>/\` に保存し、原文と訳文の両方から相対パスで参照している。
 - 返信スレッドは各本文の末尾に「コメント欄」として連結済み。
 

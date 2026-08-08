@@ -120,4 +120,5 @@ writeup の 400 バイトの Cookie バナーを「取得成功」として保�
 
 重要なのは役割分担で、**エージェントが根拠にしてよいのは英語原文
 （`research/rendered/*.md`）だけ**、日本語訳（`docs/research-ja/`）は人間専用。
-訳文は `.claude/settings.json` の `permissions.deny` で Read が塞いである。
+訳文は `.claude/settings.json` の `permissions.ask` に入っていて、エージェントが
+自分の判断で開こうとすると確認が入る（無人実行は承認者がいないので拒否される）。

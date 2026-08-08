@@ -113,8 +113,10 @@ downstream announces the substitution — a single mistranslated hyperparameter
 becomes a premise nobody can trace back. So the separation is mechanical, not a
 convention people are asked to remember:
 
-1. `.claude/settings.json` denies `Read(./docs/research-ja/**)`. `deny` beats
-   `allow`, so the Read tool cannot open those files at all.
+1. `.claude/settings.json` puts `Read(./docs/research-ja/**)` in `permissions.ask`.
+   What that blocks is an agent *deciding on its own* to read a translation: the
+   attempt becomes a prompt you have to approve. If you asked for it, approve it.
+   An unattended run has nobody to ask and is refused — measured, not assumed.
 2. Every generated file carries a `<!-- HUMAN-ONLY-TRANSLATION -->` marker with
    the path of its English original. `research_ja.py index` re-asserts the
    marker on every run, so it does not depend on the translating agent
@@ -122,10 +124,10 @@ convention people are asked to remember:
 3. The index and the PR body say the same thing in the place someone would
    actually be standing when they get it wrong.
 
-Read the translations yourself freely. When you want an *agent* to use one,
-point it at `research/rendered/<key>.md` instead. If you genuinely need the deny
-rule lifted, drop the line — but check first whether reading the original would
-have answered the question.
+Read the translations yourself freely. When an agent needs the *substance*, point
+it at `research/rendered/<key>.md` — that is the sanctioned path and it needs no
+approval. The prompt is not there to stop you; it is there so that "the agent read
+a translation" is always a decision someone made, never a default.
 
 Details, including the failure modes behind each design choice, are in
 `.claude/skills/kaggle/research-ja-translation.md`.

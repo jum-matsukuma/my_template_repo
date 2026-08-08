@@ -14,10 +14,15 @@ The two corpora are deliberately kept apart, and the split is the point:
 
 A translation is a lossy derivative. If an agent cites it, every downstream
 decision inherits a translator's paraphrase instead of what the author wrote --
-and nothing in the chain announces that it happened. So the Japanese side is
-excluded by a `permissions.deny` rule in `.claude/settings.json`, every
-generated file carries a machine-greppable HUMAN-ONLY marker, and this script
-re-asserts that marker on every `index` run.
+and nothing in the chain announces that it happened. So `.claude/settings.json`
+puts the Japanese side behind a `permissions.ask` rule, every generated file
+carries a machine-greppable HUMAN-ONLY marker, and this script re-asserts that
+marker on every `index` run.
+
+What the `ask` rule gates is an agent deciding *by itself* to source an answer
+from a translation -- not a human asking it to read one, which is a legitimate
+request the user can simply approve. An unattended run has no approver and is
+refused outright, which is the case that actually needed closing.
 
 Pipeline
 --------
@@ -65,7 +70,7 @@ UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
 
 # Every file under the Japanese docs directory starts with this. It exists so a
 # human skimming the file knows it is a derivative, and so an agent that reaches
-# the text through some path the deny rule does not cover (a pasted excerpt, a
+# the text through some path the ask rule does not cover (a pasted excerpt, a
 # web view of the repo) is told, in the text itself, to go read the original.
 HUMAN_ONLY_MARK = "<!-- HUMAN-ONLY-TRANSLATION"
 
@@ -722,20 +727,24 @@ def index(a) -> int:
     L.append("     Agents: read the English originals under research/rendered/.")
     L.append("-->")
     L.append("")
-    L.append("> 🇯🇵 **このディレクトリは人間の読者専用です。**")
+    L.append("> 🇯🇵 **このディレクトリは人間の読者向けです。**")
     L.append(">")
     L.append(
         "> ここにあるのは英語原文の日本語訳（＝二次的な派生物）です。"
-        "**エージェントはここを参照しません。**"
+        "**エージェントは自分の判断ではここを参照しません。**"
     )
-    L.append("> エージェントが読むのは英語原文の方 — `research/rendered/*.md` — です。")
+    L.append(
+        "> エージェントが根拠にするのは英語原文の方 — `research/rendered/*.md` — です"
+        "（ユーザーが明示的に指示した場合を除く）。"
+    )
     L.append(
         "> 訳文を根拠に判断すると、著者が書いた内容ではなく訳者の解釈が"
         "下流のすべてに伝播し、しかもそれが起きたことは誰にも分かりません。"
     )
     L.append(
-        "> この分離は `.claude/settings.json` の `permissions.deny` で"
-        "機械的に強制しています。"
+        "> この分離は `.claude/settings.json` の `permissions.ask` で機械的に"
+        "一段挟んであります（エージェントが自分の判断で読もうとすると確認が入り、"
+        "無人実行は拒否されます）。"
     )
     L.append("")
     L.append("## 方針")

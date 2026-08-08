@@ -32,7 +32,7 @@
       "Bash(codex --version)",
       "WebFetch(domain:github.com)"
     ],
-    "deny": [
+    "ask": [
       "Read(./docs/research-ja/**)",
       "Read(./docs/*-ja/**)"
     ]

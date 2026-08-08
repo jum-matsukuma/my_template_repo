@@ -64,6 +64,6 @@ python3 scripts/research_ja.py html --out research --docs docs/research-ja \
 
 `docs/research-ja/` は**人間専用**。エージェントが根拠にしてよいのは
 `research/rendered/*.md`（英語原文）だけで、訳文は `.claude/settings.json` の
-`permissions.deny` で Read が塞いである。訳文を読みたくなったら、まず
-「原文を読めば済むのでは」を確認する。理由は
+`permissions.ask` に入っているので、自分の判断で訳文を開こうとすると確認が入る。
+ユーザーから明示的に指示されたなら承認して読んでよい。理由は
 [.claude/skills/kaggle/research-ja-translation.md](../skills/kaggle/research-ja-translation.md) に書いてある。
