@@ -28,6 +28,8 @@ Pipeline
 --------
     prep     render selected topics/writeups to markdown, localize figures,
              append the comment thread, record a source sha   [deterministic]
+             selection: every writeup, no threshold. --min-votes adds ordinary
+             discussion threads on top; --all-topics takes everything.
     pending  list what has no up-to-date translation           [deterministic]
     -------- the translating agent runs here, one document at a time ---------
     index    build the Japanese README, enforce HUMAN-ONLY markers
@@ -74,9 +76,11 @@ UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
 # web view of the repo) is told, in the text itself, to go read the original.
 HUMAN_ONLY_MARK = "<!-- HUMAN-ONLY-TRANSLATION"
 
-# Titles that mark a thread worth translating even when it has few votes. A
-# solution writeup posted an hour before the deadline has no votes yet and is
-# still the most valuable thread in the competition.
+# Solution writeups are ALL in scope, and this is what identifies one when it was
+# posted as a discussion thread rather than to kaggle.com/writeups. There is
+# deliberately no vote threshold in the default: a writeup posted an hour before
+# the deadline has no votes yet and is still the most valuable thread in the
+# competition, and a rule that needs votes to notice it notices it too late.
 SOLUTION_RE = re.compile(
     r"\b(\d+(?:st|nd|rd|th)\s+place|solution|write[\s-]?up|approach|our\s+method"
     r"|what\s+worked|lessons?\s+learned|gold|silver|prize)\b",
@@ -389,7 +393,7 @@ def select_topics(m_tp: dict, a) -> list[tuple[str, dict]]:
             a.all_topics
             or tid in forced
             or SOLUTION_RE.search(title)
-            or votes >= a.min_votes
+            or (a.min_votes > 0 and votes >= a.min_votes)
         ):
             picked.append((tid, rec))
     picked.sort(
@@ -1103,8 +1107,9 @@ def main() -> int:
     p.add_argument(
         "--min-votes",
         type=int,
-        default=20,
-        help="translate discussion threads at or above this vote count",
+        default=0,
+        help="also pull in ordinary discussion threads at or above this vote "
+        "count. 0 (default) = off: solution writeups only, all of them",
     )
     p.add_argument(
         "--topic", action="append", help="force-include a topic id (repeatable)"

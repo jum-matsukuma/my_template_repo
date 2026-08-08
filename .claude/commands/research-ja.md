@@ -18,8 +18,13 @@ python3 scripts/research_ja.py prep --comp <slug> --out research --docs docs/res
 
 本文を r.jina.ai 経由で Markdown 化し、図を `research/assets/<key>/` に落とし、
 返信スレッドを本文末尾に連結して `research/rendered/<key>.md` を書く。
-対象は「タイトルが解法writeupに見える or votes 20以上」。広げるなら
-`--min-votes 5` / `--all-topics`、個別指定は `--topic <id>`。
+
+**対象は解法 writeup 全件**（`kaggle.com/writeups/*` と、タイトルが解法 writeup の
+discussion スレッド）。votes による足切りはしない。締切直前に投稿された1位解法は
+votes 0 なので、票で絞ると一番読みたいものを取り逃す。
+
+一般のディスカッションも訳したいときだけ `--min-votes N` を足す。個別指定は
+`--topic <id>`、全スレッドは `--all-topics`（高い）。
 
 **2. 未訳の一覧を出す**
 

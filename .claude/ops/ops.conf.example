@@ -65,10 +65,15 @@ TRANSLATE_MAX_PER_RUN=5
 # cheap but rate-limited; the cap keeps one night's run from stalling on it.
 TRANSLATE_PREP_LIMIT=40
 
-# Extra flags for `research_ja.py prep`. The default selection is
-# "any thread whose title looks like a solution writeup, plus anything at or
-# above --min-votes (20)". Widen with --min-votes 5, or --all-topics to render
-# every tracked thread (expensive: every one becomes a translation candidate).
+# Extra flags for `research_ja.py prep`. The default is EVERY solution writeup
+# and nothing else: all of kaggle.com/writeups/*, plus every discussion thread
+# whose title reads as a writeup -- with no vote threshold, because the 1st place
+# writeup posted an hour before the deadline has zero votes and is the one you
+# least want to miss.
+#
+# Add --min-votes N to also translate ordinary discussion threads at or above N
+# votes, or --all-topics for every tracked thread (expensive: each one becomes a
+# translation candidate).
 #   TRANSLATE_ARGS="--min-votes 10 --topic 733154"
 TRANSLATE_ARGS=""
 

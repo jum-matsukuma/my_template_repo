@@ -101,12 +101,19 @@ python3 scripts/research_ja.py html --out research --docs docs/research-ja \
 
 ## 翻訳対象の選び方
 
-既定は「**タイトルが解法writeupに見えるスレッド**（`3rd place` / `solution` /
-`write-up` / `approach` / `lessons learned` …）**または votes 20 以上**」。
-締切1時間前に投稿された1位解法は votes 0 なので、票だけで選ぶと取り逃す。
+**解法 writeup は全件が対象。votes による足切りはしない。** 内訳は2つ:
+
+- `kaggle.com/writeups/*`（`kaggle_research.py` が取得済みのもの）— 無条件で全部
+- **タイトルが解法 writeup に見える discussion スレッド**（`3rd place` / `solution` /
+  `write-up` / `approach` / `lessons learned` …）— 票数に関係なく全部
+
+票で絞らないのは、締切1時間前に投稿された1位解法が votes 0 だから。閾値を既定に
+置くと、一番読みたいものを一番取り逃しやすい設計になる。
+
+一般のディスカッションまで訳したいときだけ `--min-votes N` を明示する（既定 0 = 無効）。
 
 ```bash
---min-votes 10        # 閾値を下げる
+--min-votes 10        # 一般スレッドも votes 10 以上なら対象に加える（既定は無効）
 --topic 733154        # 個別に強制追加（繰り返し可）
 --all-topics          # 全スレッド（高い。全部が翻訳候補になる）
 --skip-writeups       # writeup を除外
