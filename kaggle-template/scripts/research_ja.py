@@ -581,7 +581,7 @@ def prep(a) -> int:
     )
 
     pend = pending_list(state, docs)
-    print(f"\nrendered {len(docs_state)} documents; {len(pend)} await translation")
+    print(f"\ntracking {len(docs_state)} documents; {len(pend)} await translation")
     if deferred:
         print(f"  {deferred} deferred by --limit {a.limit}; re-run to continue")
     for w in warnings[:10]:

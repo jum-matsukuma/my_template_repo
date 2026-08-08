@@ -100,7 +100,7 @@ FETCH_RC=${PIPESTATUS[0]}
 # --- is there anything to commit? ------------------------------------------
 CHANGED=0
 # shellcheck disable=SC2086
-git diff --quiet -- $COMMIT_PATHS 2>/dev/null || CHANGED=1
+git diff --quiet HEAD -- $COMMIT_PATHS 2>/dev/null || CHANGED=1
 # shellcheck disable=SC2086
 [ -n "$(git ls-files --others --exclude-standard -- $COMMIT_PATHS 2>/dev/null)" ] && CHANGED=1
 
@@ -110,8 +110,15 @@ if [ "$CHANGED" = "0" ]; then
 fi
 
 # shellcheck disable=SC2086
+# A bare `git commit` commits the WHOLE INDEX, not the paths staged above. If a
+# concurrent interactive session left anything staged, an unattended run adopts
+# it -- observed in the wild: a nightly job authored 2 files and committed 1073,
+# sweeping in another session's work under a message that described neither.
+# The pathspec makes the commit contain exactly what this job produced.
 git add $COMMIT_PATHS 2>/dev/null
-git commit -q -m "chore(research): $COMP daily fetch $DATE [launchd]" || {
+# shellcheck disable=SC2086
+git commit -q -m "chore(research): $COMP daily fetch $DATE [launchd]" \
+  -- $COMMIT_PATHS || {
   echo "[research] nothing staged"
   exit "$FETCH_RC"
 }

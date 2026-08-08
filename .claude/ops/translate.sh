@@ -118,6 +118,9 @@ echo "[translate] rendering translatable sources"
 # shellcheck disable=SC2086
 python3 "$TOOL" prep --comp "$COMP" --out "$OUT_DIR" --docs "$JA_DIR" \
   --limit "$PREP_LIMIT" $TRANSLATE_ARGS 2>&1 | tail -20
+# Kept so the run does not report success after a render that partly failed;
+# run-daily.sh only stamps the day complete on rc=0, so a retry can still run.
+PREP_RC=${PIPESTATUS[0]}
 
 PENDING="$(python3 "$TOOL" pending --out "$OUT_DIR" --docs "$JA_DIR" \
              --porcelain --limit "$MAX_PER_RUN" 2>/dev/null)"
@@ -165,18 +168,27 @@ if [ "${TRANSLATE_HTML:-1}" = "1" ]; then
 fi
 
 # --- commit; the agent has no Bash by design -------------------------------
+# `git diff` alone compares the worktree to the INDEX, so work this job already
+# staged reads as "no changes" and never gets committed. Compare against HEAD.
 # shellcheck disable=SC2086
-if git diff --quiet -- $TRANSLATE_PATHS 2>/dev/null \
+if git diff --quiet HEAD -- $TRANSLATE_PATHS 2>/dev/null \
    && [ -z "$(git ls-files --others --exclude-standard -- $TRANSLATE_PATHS 2>/dev/null)" ]; then
   echo "[translate] no changes to commit"
-  exit 0
+  exit "$PREP_RC"
 fi
 
+# A bare `git commit` commits the WHOLE INDEX, not the paths staged above. If a
+# concurrent interactive session left anything staged, an unattended run adopts
+# it -- observed in the wild: a nightly job authored 2 files and committed 1073,
+# sweeping in another session's work under a message that described neither.
+# The pathspec makes the commit contain exactly what this job produced.
 # shellcheck disable=SC2086
 git add -A $TRANSLATE_PATHS 2>/dev/null
-if ! git commit -q -m "docs(research-ja): daily translation $DATE [launchd]"; then
+# shellcheck disable=SC2086
+if ! git commit -q -m "docs(research-ja): daily translation $DATE [launchd]" \
+     -- $TRANSLATE_PATHS; then
   echo "[translate] nothing staged"
-  exit 0
+  exit "$PREP_RC"
 fi
 
 if ! git push -q -u origin "$BRANCH"; then
@@ -208,3 +220,7 @@ if command -v gh >/dev/null 2>&1; then
       && echo "[translate] appended status to existing PR"
   fi
 fi
+
+# A render that failed part way must not mark the day complete, or the retry
+# never runs and the gap is invisible.
+exit "$PREP_RC"

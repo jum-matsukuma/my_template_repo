@@ -106,15 +106,22 @@ claude -p "$(cat "$PROMPT_FILE")" \
 # We are already on the ops branch and the tree was clean before the agent ran,
 # so anything staged now is the agent's doing.
 # shellcheck disable=SC2086
-if git diff --quiet -- $FACTCHECK_PATHS 2>/dev/null \
+if git diff --quiet HEAD -- $FACTCHECK_PATHS 2>/dev/null \
    && [ -z "$(git ls-files --others --exclude-standard -- $FACTCHECK_PATHS 2>/dev/null)" ]; then
   echo "[factcheck] no changes to commit"
   exit 0
 fi
 
 # shellcheck disable=SC2086
+# A bare `git commit` commits the WHOLE INDEX, not the paths staged above. If a
+# concurrent interactive session left anything staged, an unattended run adopts
+# it -- observed in the wild: a nightly job authored 2 files and committed 1073,
+# sweeping in another session's work under a message that described neither.
+# The pathspec makes the commit contain exactly what this job produced.
 git add -A $FACTCHECK_PATHS 2>/dev/null
-if ! git commit -q -m "chore(ops): daily fact-check $DATE [launchd]"; then
+# shellcheck disable=SC2086
+if ! git commit -q -m "chore(ops): daily fact-check $DATE [launchd]" \
+     -- $FACTCHECK_PATHS; then
   echo "[factcheck] nothing staged"
   exit 0
 fi
