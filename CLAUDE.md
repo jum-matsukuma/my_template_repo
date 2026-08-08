@@ -246,18 +246,9 @@ cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
 `.claude/ops/README.md`。
 
 取得した英語原文の**日本語全訳（図つき）**を作る層が `research_ja.py` と
-`.claude/ops/translate.sh`（`/research-ja`）。手順と落とし穴は
+`.claude/ops/translate.sh`（`/research-ja`）。手順・落とし穴・分離の理由は
 `.claude/skills/kaggle/research-ja-translation.md`。
 
-> **原文と訳文の役割分担（重要）**
->
-> - エージェントが根拠にしてよいのは**英語原文** `research/rendered/*.md` **だけ**。
-> - `docs/research-ja/` の日本語訳は**人間向け**。`.claude/settings.json` の
->   `permissions.ask` に入れてあるので、Read しようとすると確認が入る。
-> - 塞いでいるのは「**エージェントが自分の判断で訳文を取りに行くこと**」であって、
->   ユーザーの指示ではない。ユーザーが明示的に読めと言ったなら、確認を承認して読めばよい。
->   逆に、確認プロンプトが出た時点で「原文で足りるのでは」を考え直す機会になる。
-> - 無人実行（`claude -p`・サブエージェント・launchd ジョブ）は承認する人がいないので
->   自動的に拒否される。実測で確認済み。これは仕様であって不具合ではない。
-> - 理由: 訳文は損失のある派生物で、エージェントがそれを引用すると著者の記述では
->   なく訳者の解釈が下流の判断に伝播し、しかもそれが起きたことに誰も気づけない。
+> **根拠にするのは英語原文 `research/rendered/*.md`。** `docs/research-ja/` の訳文は
+> 人間向けで `permissions.ask` 付き — 自分の判断では取りに行かない（ユーザーが明示的に
+> 指示したなら承認して読んでよい）。
