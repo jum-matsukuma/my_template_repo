@@ -1,0 +1,26 @@
+# The daily jobs, and when they run. Sourced by install.sh, uninstall.sh and
+# run-daily.sh so the list lives in exactly one place -- it used to be spelled
+# out in all three, and a job added to install.sh but not to run-daily.sh keeps
+# running forever because the auto-stop loop never boots it out.
+#
+# Format: job:hour:minute. Stagger them: they share one lock directory and a
+# single working tree, so overlapping runs serialize at best.
+#
+# Order matters here. `translate` consumes what `research` fetched, so it runs
+# after it; `factcheck` runs last so it sees both.
+OPS_JOBS=("research:3:3" "translate:4:4" "factcheck:5:5")
+
+# Jobs that are off unless ops.conf turns them on. `translate` spends model
+# tokens per document, so opting in is a decision you should make deliberately
+# rather than inherit from a template default.
+ops_job_enabled() {
+  case "$1" in
+    translate) [ "${TRANSLATE_ENABLED:-0}" = "1" ] ;;
+    *) true ;;
+  esac
+}
+
+ops_job_names() {
+  local spec
+  for spec in "${OPS_JOBS[@]}"; do printf '%s\n' "${spec%%:*}"; done
+}

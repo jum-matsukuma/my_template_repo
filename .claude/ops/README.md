@@ -24,11 +24,17 @@ Removal, which you should do the day the competition ends:
 | job | default time | what it does |
 |---|---|---|
 | `research` | 03:03 | `kaggle_research.py` differential fetch → commit → draft PR |
+| `translate` | 04:04 | render → per-document translating agent → Japanese docs → draft PR |
 | `factcheck` | 05:05 | deterministic ground truth → scoped agent → commit |
 
-`run-daily.sh <job>` is the entry point for both; it dispatches to `<job>.sh`.
-Add your own job by dropping in a `myjob.sh` and adding it to `JOBS` in
-`install.sh`.
+`run-daily.sh <job>` is the entry point for all of them; it dispatches to
+`<job>.sh`. Add your own by dropping in a `myjob.sh` and adding it to
+`OPS_JOBS` in `jobs.def` — that one list is what install, uninstall and the
+auto-stop loop all read, so a job cannot end up registered by one and forgotten
+by another.
+
+`translate` is **off by default**: it is the only job that spends model tokens
+per document. Set `TRANSLATE_ENABLED=1` in `ops.conf` and re-run `./install.sh`.
 
 ## Why launchd, and not an in-session scheduler
 
@@ -62,6 +68,11 @@ These exist because each one has a matching failure story.
 - **The factcheck agent has no Bash and no Task.** It reads, searches and
   edits. It cannot run training code, submit, or spawn subagents. The wrapper
   does the git work, where it is auditable.
+- **The translate agent gets one document at a time.** Same tool restrictions,
+  plus a per-document turn budget. An agent handed the whole batch starts
+  summarizing when it runs low on turns — which is the single failure the job
+  exists to prevent — and a crash at document 30 of 48 would lose the 29
+  finished translations.
 
 ## The PR flow
 
@@ -85,3 +96,36 @@ That means Kaggle reports more comments than the fetcher retrieved. Usually it
 is a deleted comment. Occasionally it is the fetcher losing content, which is
 exactly the failure that motivated the check — an earlier tool returned 15
 comments where Kaggle showed 64, and nothing announced it.
+
+## The translation layer, and why it is quarantined
+
+`translate` produces Japanese full translations of the discussion threads and
+solution writeups, with the original figures downloaded and the reply thread
+attached to the end of the body it belongs to. It is for **humans**.
+
+    research/rendered/     English.  Agent-facing. The canonical text.
+    research/assets/       Figures.  Referenced by both sides.
+    docs/research-ja/      Japanese. HUMAN-FACING ONLY.
+
+A translation is a lossy derivative. An agent that cites one inherits a
+translator's paraphrase instead of what the author wrote, and nothing
+downstream announces the substitution — a single mistranslated hyperparameter
+becomes a premise nobody can trace back. So the separation is mechanical, not a
+convention people are asked to remember:
+
+1. `.claude/settings.json` denies `Read(./docs/research-ja/**)`. `deny` beats
+   `allow`, so the Read tool cannot open those files at all.
+2. Every generated file carries a `<!-- HUMAN-ONLY-TRANSLATION -->` marker with
+   the path of its English original. `research_ja.py index` re-asserts the
+   marker on every run, so it does not depend on the translating agent
+   remembering to emit it.
+3. The index and the PR body say the same thing in the place someone would
+   actually be standing when they get it wrong.
+
+Read the translations yourself freely. When you want an *agent* to use one,
+point it at `research/rendered/<key>.md` instead. If you genuinely need the deny
+rule lifted, drop the line — but check first whether reading the original would
+have answered the question.
+
+Details, including the failure modes behind each design choice, are in
+`.claude/skills/kaggle/research-ja-translation.md`.

@@ -17,7 +17,10 @@ source "$CONF"
 
 UID_N="$(id -u)"
 AGENTS="$HOME/Library/LaunchAgents"
-JOBS=(research factcheck)
+# shellcheck source=/dev/null
+source "$OPS_DIR/jobs.def"
+JOBS=()
+while IFS= read -r j; do JOBS+=("$j"); done < <(ops_job_names)
 [ $# -gt 0 ] && JOBS=("$@")
 
 for JOB in "${JOBS[@]}"; do

@@ -103,6 +103,10 @@ docs/archive/
 # committable so the daily job can surface their changes as a reviewable diff.
 research/notebooks/
 
+# Raw r.jina.ai page captures used to build research/rendered/. Regenerable,
+# full of page furniture, and large; the cleaned rendition is what gets read.
+research/.jina_raw/
+
 # Ops runtime state (machine-local; the templates and scripts stay versioned)
 .claude/ops/ops.conf
 .claude/ops/logs/

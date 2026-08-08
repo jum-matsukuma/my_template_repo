@@ -193,7 +193,7 @@ project-root/
 │   ├── agents/         # Custom agent definitions
 │   │   ├── code-reviewer.md
 │   │   └── codex-reviewer.md
-│   ├── commands/       # Slash commands (/pr, /kaggle-research, /codex-review, ...)
+│   ├── commands/       # Slash commands (/pr, /kaggle-research, /research-ja, /codex-review, ...)
 │   ├── hooks/          # notify.sh / format.sh / pr-review-nudge.sh
 │   ├── ops/            # 無人の定期ジョブ (launchd → draft PR)。opt-in
 │   │   └── README.md
@@ -244,3 +244,16 @@ cp -r .claude/skills/templates/competition .claude/skills/<competition-slug>
 日次で自動取得して draft PR にする仕組みが `.claude/ops/` にある（**opt-in**、
 `ops.conf` を作って `install.sh` を実行したときだけ動く）。詳細は
 `.claude/ops/README.md`。
+
+取得した英語原文の**日本語全訳（図つき）**を作る層が `research_ja.py` と
+`.claude/ops/translate.sh`（`/research-ja`）。手順と落とし穴は
+`.claude/skills/kaggle/research-ja-translation.md`。
+
+> **原文と訳文の役割分担（重要）**
+>
+> - エージェントが根拠にしてよいのは**英語原文** `research/rendered/*.md` **だけ**。
+> - `docs/research-ja/` の日本語訳は**人間専用**で、`.claude/settings.json` の
+>   `permissions.deny` により Read できない。これは仕様であって不具合ではない。
+> - 理由: 訳文は損失のある派生物で、エージェントがそれを引用すると著者の記述では
+>   なく訳者の解釈が下流の判断に伝播し、しかもそれが起きたことに誰も気づけない。
+> - 訳文を読みたくなったら、まず「原文を読めば済むのでは」を確認する。

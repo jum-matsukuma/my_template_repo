@@ -31,6 +31,10 @@
       "Bash(bash .claude/scripts/codex-run.sh:*)",
       "Bash(codex --version)",
       "WebFetch(domain:github.com)"
+    ],
+    "deny": [
+      "Read(./docs/research-ja/**)",
+      "Read(./docs/*-ja/**)"
     ]
   },
   "statusLine": {

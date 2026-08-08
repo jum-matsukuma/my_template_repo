@@ -17,6 +17,8 @@ CONF="$OPS_DIR/ops.conf"
 [ -f "$CONF" ] || { echo "missing $CONF (copy ops.conf.example)"; exit 1; }
 # shellcheck source=/dev/null
 source "$CONF"
+# shellcheck source=/dev/null
+source "$OPS_DIR/jobs.def"
 
 # Required, and validated here rather than failing obscurely later under `set -u`.
 : "${REPO:?ops.conf must set REPO}"
@@ -40,10 +42,10 @@ echo "=== $JOB start $(date '+%F %T %Z') ==="
 TODAY="$(date +%Y-%m-%d)"
 if [[ "$TODAY" > "$STOP_DATE" ]]; then
   echo "past STOP_DATE ($STOP_DATE) - self-uninstalling LaunchAgents"
-  for j in research factcheck; do
+  while IFS= read -r j; do
     launchctl bootout "gui/$UID_N/com.${PREFIX}.${j}" 2>/dev/null || true
     rm -f "$HOME/Library/LaunchAgents/com.${PREFIX}.${j}.plist"
-  done
+  done < <(ops_job_names)
   echo "uninstalled."
   exit 0
 fi

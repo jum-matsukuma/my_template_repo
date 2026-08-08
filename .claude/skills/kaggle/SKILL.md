@@ -27,6 +27,7 @@ uv run kaggle competitions submit -c competition-name -f submission.csv -m "Mess
 ### Setup and Tools
 - [kaggle-api-setup.md](kaggle-api-setup.md) - Kaggle API installation and authentication guide
 - [kaggle-scraping.md](kaggle-scraping.md) - 公開情報の取得（notebook/discussion/コメント/writeup）。**公式 CLI が正、Playwright は不要**
+- [research-ja-translation.md](research-ja-translation.md) - 取得した英語原文の**日本語全訳（図つき）**。**原文=エージェント用 / 訳文=人間専用**の分離が要点
 - [kaggle-gpu-kernels.md](kaggle-gpu-kernels.md) - GPU カーネルの実務（P100 非互換・12h 強制 CANCEL・週 30h クォータ・slug 汚染）
 - [long-running-jobs.md](long-running-jobs.md) - 1 時間超のジョブと定期実行の扱い方
 - [colab-workflow.md](colab-workflow.md) - Google Colab + Claude Code development workflow（Drive 構成・チェックポイント戦略。実行は colab スキル推奨）

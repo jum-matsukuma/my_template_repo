@@ -43,3 +43,41 @@ FETCH_ARGS=""
 # Optional: raises the r.jina.ai rate limit for writeup body fetches.
 # Leave unset to use the keyless tier. Never commit a real key.
 # JINA_API_KEY=""
+
+# --- translate job (日本語訳) ----------------------------------------------
+#
+# Off by default: it is the only daily job that spends model tokens per
+# document, so opting in should be a decision rather than a template default.
+# Turn it on, then re-run ./install.sh to register the LaunchAgent.
+TRANSLATE_ENABLED=0
+
+# Where the Japanese translations land. HUMAN-FACING ONLY -- agents read the
+# English originals under $OUT_DIR/rendered/ instead, and .claude/settings.json
+# denies Read on this directory to keep that mechanical. See .claude/ops/README.md.
+JA_DIR="docs/research-ja"
+
+# How many documents a single nightly run translates. Each one is a separate
+# bounded agent, so this is the per-night cost dial. A backlog drains over
+# several nights; nothing is lost by keeping it small.
+TRANSLATE_MAX_PER_RUN=5
+
+# How many discussion pages a single run renders through r.jina.ai. Rendering is
+# cheap but rate-limited; the cap keeps one night's run from stalling on it.
+TRANSLATE_PREP_LIMIT=40
+
+# Extra flags for `research_ja.py prep`. The default selection is
+# "any thread whose title looks like a solution writeup, plus anything at or
+# above --min-votes (20)". Widen with --min-votes 5, or --all-topics to render
+# every tracked thread (expensive: every one becomes a translation candidate).
+#   TRANSLATE_ARGS="--min-votes 10 --topic 733154"
+TRANSLATE_ARGS=""
+
+# Browsable HTML export of the translations (figures inlined, dark/light aware).
+# Written outside the repo so it is never committed by accident.
+TRANSLATE_HTML=1
+TRANSLATE_HTML_DIR="$HOME/Downloads/${PREFIX}-research-ja"
+
+# Paths the translate job commits. Includes research/rendered and research/assets
+# because the translation is meaningless without the English original it was made
+# from and the figures both sides point at.
+TRANSLATE_PATHS="docs/research-ja research/rendered research/assets research/translate_manifest.json"
