@@ -19,12 +19,23 @@ python3 scripts/research_ja.py prep --comp <slug> --out research --docs docs/res
 本文を r.jina.ai 経由で Markdown 化し、図を `research/assets/<key>/` に落とし、
 返信スレッドを本文末尾に連結して `research/rendered/<key>.md` を書く。
 
-**対象は解法 writeup 全件**（`kaggle.com/writeups/*` と、タイトルが解法 writeup の
-discussion スレッド）。votes による足切りはしない。締切直前に投稿された1位解法は
-votes 0 なので、票で絞ると一番読みたいものを取り逃す。
+**対象は既定で「取得済みの全部」** — writeup 全件と、discussion スレッド全件。
+足切りはしない。`kaggle_research.py` が既に全スレッドを列挙しているので、ここで
+絞るのは「取得までしておいて誰にも読ませない」という選択になる。しかも Kaggle CLI
+の payload には**本文が入っていない**ので、レンダリングされなかったスレッドは
+英語ですら本文がリポジトリに存在しない状態になる。
 
-一般のディスカッションも訳したいときだけ `--min-votes N` を足す。個別指定は
-`--topic <id>`、全スレッドは `--all-topics`（高い）。
+代わりに**順序**で効かせている: 順位付きの解法 writeup が先頭、その後は votes 降順。
+`--limit` で打ち切っても価値の高い方から処理されるので、残りは次回以降に回る。
+
+絞りたいときだけ:
+
+```bash
+--writeups-only                 # 解法 writeup だけ
+--writeups-only --min-votes 10  # ＋ votes 10 以上の一般スレッド
+--skip-writeups                 # discussion のみ
+--topic <id>                    # 個別に強制追加（繰り返し可）
+```
 
 **2. 未訳の一覧を出す**
 
@@ -63,6 +74,24 @@ python3 scripts/research_ja.py html --out research --docs docs/research-ja \
 ```
 
 壊れた内部参照があれば非ゼロで終了する。0 件であることを確認する。
+
+## バックログを一気に消化したいとき
+
+日次ジョブは1晩あたり `TRANSLATE_MAX_PER_RUN` 件しか訳さない。コンペ終了直後など、
+溜まった分を今すぐ全部消化したい場合:
+
+```bash
+# ops.conf の値を一時的に上げる
+TRANSLATE_MAX_PER_RUN=200
+TRANSLATE_PREP_LIMIT=500
+
+# 同日中に再実行するには当日の完了記録を消す（1日1回の重複実行ガード）
+rm -f .claude/ops/.state-translate
+bash .claude/ops/run-daily.sh translate
+```
+
+`run-daily.sh` は `ops.conf` を source するので、環境変数で上書きしても効かない。
+値そのものを書き換えること。
 
 ## 忘れてはいけないこと
 

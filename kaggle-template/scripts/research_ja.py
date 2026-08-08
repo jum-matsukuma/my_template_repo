@@ -28,8 +28,8 @@ Pipeline
 --------
     prep     render selected topics/writeups to markdown, localize figures,
              append the comment thread, record a source sha   [deterministic]
-             selection: every writeup, no threshold. --min-votes adds ordinary
-             discussion threads on top; --all-topics takes everything.
+             selection: the whole discussion corpus plus every writeup,
+             ordered writeups-first. --writeups-only narrows it.
     pending  list what has no up-to-date translation           [deterministic]
     -------- the translating agent runs here, one document at a time ---------
     index    build the Japanese README, enforce HUMAN-ONLY markers
@@ -384,18 +384,29 @@ def comments_section(comments: list) -> str:
 # prep
 # --------------------------------------------------------------------------
 def select_topics(m_tp: dict, a) -> list[tuple[str, dict]]:
+    """Which discussion threads get rendered. Default: all of them.
+
+    The fetcher already enumerates every topic, so anything excluded here is
+    information the repo paid to collect and then declined to make readable --
+    and because the CLI payload carries no post body, a thread that is never
+    rendered has no body in the corpus at all, in either language. Selecting a
+    subset was quietly deciding what nobody would ever read.
+
+    Ordering carries the load instead of filtering: ranked solution writeups
+    first, then everything else by votes. A capped run therefore renders the
+    valuable end first and the long tail drains over later runs, which is what
+    makes "everything" affordable rather than reckless.
+    """
     picked = []
     forced = set(a.topic or [])
     for tid, rec in m_tp.items():
         title = rec.get("title") or ""
         votes = int(rec.get("votes") or 0)
-        if (
-            a.all_topics
-            or tid in forced
-            or SOLUTION_RE.search(title)
-            or (a.min_votes > 0 and votes >= a.min_votes)
-        ):
-            picked.append((tid, rec))
+        if a.writeups_only:
+            keep = tid in forced or bool(SOLUTION_RE.search(title))
+            if not keep and not (a.min_votes > 0 and votes >= a.min_votes):
+                continue
+        picked.append((tid, rec))
     picked.sort(
         key=lambda kv: (
             rank_of(kv[1].get("title") or "") or 10**9,
@@ -1105,18 +1116,23 @@ def main() -> int:
     common(p)
     p.add_argument("--comp", required=True)
     p.add_argument(
+        "--writeups-only",
+        action="store_true",
+        help="narrow to solution writeups instead of the whole corpus",
+    )
+    p.add_argument(
         "--min-votes",
         type=int,
         default=0,
-        help="also pull in ordinary discussion threads at or above this vote "
-        "count. 0 (default) = off: solution writeups only, all of them",
+        help="with --writeups-only, also keep ordinary threads at or above this "
+        "vote count (0 = off). Without it every thread is kept anyway",
     )
     p.add_argument(
         "--topic", action="append", help="force-include a topic id (repeatable)"
     )
-    p.add_argument(
-        "--all-topics", action="store_true", help="render every tracked topic"
-    )
+    # Accepted and ignored: this was how you asked for everything before
+    # everything became the default, and existing ops.conf files still pass it.
+    p.add_argument("--all-topics", action="store_true", help=argparse.SUPPRESS)
     p.add_argument("--skip-writeups", action="store_true")
     p.add_argument("--limit", type=int, default=0, help="cap jina fetches this run")
     p.add_argument("--full", action="store_true", help="ignore caches and re-render")

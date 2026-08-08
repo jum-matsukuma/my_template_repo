@@ -99,9 +99,16 @@ comments where Kaggle showed 64, and nothing announced it.
 
 ## The translation layer, and why it is quarantined
 
-`translate` produces Japanese full translations of the discussion threads and
-solution writeups, with the original figures downloaded and the reply thread
-attached to the end of the body it belongs to. It is for **humans**.
+`translate` produces Japanese full translations of **every** discussion thread and
+writeup the fetcher tracks, with the original figures downloaded and the reply
+thread attached to the end of the body it belongs to. It is for **humans**.
+
+Nothing is filtered: the fetch already enumerated the whole corpus, and the Kaggle
+CLI payload carries no post body, so a thread that is never rendered has no body in
+the repo in either language. Volume is absorbed by ordering — ranked writeups
+first, then by votes — so `TRANSLATE_MAX_PER_RUN` caps a night's cost without
+deciding what gets read. On a busy competition expect 150-250 documents and about
+ten nights at the default 20/night, with the ones worth reading landing first.
 
     research/rendered/     English.  Agent-facing. The canonical text.
     research/assets/       Figures.  Referenced by both sides.

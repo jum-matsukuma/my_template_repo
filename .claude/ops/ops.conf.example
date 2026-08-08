@@ -57,24 +57,34 @@ TRANSLATE_ENABLED=0
 JA_DIR="docs/research-ja"
 
 # How many documents a single nightly run translates. Each one is a separate
-# bounded agent, so this is the per-night cost dial. A backlog drains over
-# several nights; nothing is lost by keeping it small.
-TRANSLATE_MAX_PER_RUN=5
+# bounded agent taking roughly 1-3 minutes, so 20 is about 20-60 minutes of
+# wall clock at 04:04. This is the per-night cost dial.
+#
+# The default scope is the WHOLE discussion corpus, which on a busy competition
+# is 150-250 threads, so do the division: at 20/night a full backlog takes some
+# 10 nights. That is survivable because the queue is ordered writeups-first --
+# the threads worth reading are translated on the first night or two and the
+# long tail fills in behind them. Raise it if the machine is idle anyway.
+TRANSLATE_MAX_PER_RUN=20
 
 # How many discussion pages a single run renders through r.jina.ai. Rendering is
-# cheap but rate-limited; the cap keeps one night's run from stalling on it.
-TRANSLATE_PREP_LIMIT=40
+# cheap but rate-limited at roughly 6s each, so 80 is about 8 minutes. Rendering
+# runs ahead of translation on purpose: the rendered English is useful to agents
+# immediately, whether or not a translation has caught up with it yet.
+TRANSLATE_PREP_LIMIT=80
 
-# Extra flags for `research_ja.py prep`. The default is EVERY solution writeup
-# and nothing else: all of kaggle.com/writeups/*, plus every discussion thread
-# whose title reads as a writeup -- with no vote threshold, because the 1st place
-# writeup posted an hour before the deadline has zero votes and is the one you
-# least want to miss.
+# Extra flags for `research_ja.py prep`. The default is EVERYTHING the fetcher
+# tracks: every writeup, and every discussion thread, with no vote threshold.
+# The fetcher already paid to enumerate them all, and a thread that is never
+# rendered has no post body in the corpus at all -- the Kaggle CLI payload
+# carries only metadata and replies -- so excluding one is deciding nobody will
+# ever read it.
 #
-# Add --min-votes N to also translate ordinary discussion threads at or above N
-# votes, or --all-topics for every tracked thread (expensive: each one becomes a
-# translation candidate).
-#   TRANSLATE_ARGS="--min-votes 10 --topic 733154"
+# Narrow it only if you have a reason:
+#   TRANSLATE_ARGS="--writeups-only"                  # solution writeups only
+#   TRANSLATE_ARGS="--writeups-only --min-votes 10"   # ...plus popular threads
+#   TRANSLATE_ARGS="--skip-writeups"                  # discussions only
+TRANSLATE_ARGS=""
 TRANSLATE_ARGS=""
 
 # Browsable HTML export of the translations (figures inlined, dark/light aware).

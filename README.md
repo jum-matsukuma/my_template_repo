@@ -198,10 +198,16 @@ python3 scripts/research_ja.py index --comp <slug> --out research --docs docs/re
 python3 scripts/research_ja.py html  --out research --docs docs/research-ja --dest ~/Downloads/ja
 ```
 
-Renders the selected threads to markdown, downloads their figures, glues the reply
-thread onto the end of the body, and hands one document at a time to a translating
-agent. Output is a full translation — not a summary — with the figures in their
-original positions and a browsable HTML export.
+Renders **every** fetched thread and writeup to markdown, downloads their figures,
+glues the reply thread onto the end of the body, and hands one document at a time
+to a translating agent. Output is a full translation — not a summary — with the
+figures in their original positions and a browsable HTML export.
+
+Nothing is filtered out: the fetcher already enumerated the whole corpus, and the
+Kaggle CLI payload carries no post body, so a thread left unrendered has no body in
+the repo in *either* language. Volume is handled by ordering instead — ranked
+solution writeups first, then by votes — so a capped run does the valuable end
+first and the tail drains behind it.
 
 The two corpora are kept apart on purpose: agents read the English
 (`research/rendered/`), humans read the Japanese (`docs/research-ja/`), and

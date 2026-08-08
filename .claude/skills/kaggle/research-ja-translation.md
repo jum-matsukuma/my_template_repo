@@ -101,25 +101,43 @@ python3 scripts/research_ja.py html --out research --docs docs/research-ja \
 
 ## 翻訳対象の選び方
 
-**解法 writeup は全件が対象。votes による足切りはしない。** 内訳は2つ:
+**既定は「取得済みのもの全部」**。writeup 全件 ＋ discussion スレッド全件で、
+votes による足切りもタイトルによる選別もしない。
 
-- `kaggle.com/writeups/*`（`kaggle_research.py` が取得済みのもの）— 無条件で全部
-- **タイトルが解法 writeup に見える discussion スレッド**（`3rd place` / `solution` /
-  `write-up` / `approach` / `lessons learned` …）— 票数に関係なく全部
+理由は2つある。
 
-票で絞らないのは、締切1時間前に投稿された1位解法が votes 0 だから。閾値を既定に
-置くと、一番読みたいものを一番取り逃しやすい設計になる。
+1. `kaggle_research.py` は既に**全スレッドを列挙して取得している**（全件列挙が既定、
+   `--top-topics` の方がオプトイン）。ここで絞るのは、取得コストは払ったうえで
+   「これは誰にも読ませない」と決めることに等しい。
+2. **Kaggle CLI の payload には本文が入っていない**（`id` / `title` / `authorName` /
+   `commentCount` / `votes` / `postDate` と返信だけ）。本文は `prep` が jina で
+   レンダリングして初めてリポジトリに入る。つまりレンダリングされなかったスレッドは
+   **英語ですら本文が存在しない**。選定で落とすことは、訳文だけでなく
+   エージェント用コーパスにも穴を空けることになる。
 
-一般のディスカッションまで訳したいときだけ `--min-votes N` を明示する（既定 0 = 無効）。
+### 絞るのではなく、順序で効かせる
+
+全件やると数が多い（活発なコンペで 150〜250 スレッド）。そこはフィルタではなく
+**並び順**で処理している:
+
+1. 順位付きの解法 writeup（`rank_of()` がタイトルから順位を取れるもの）
+2. それ以外を votes 降順
+
+`--limit` / `TRANSLATE_MAX_PER_RUN` で打ち切っても、**価値の高い方から**処理されて
+残りは次回以降に回る。だから「全部」が無謀ではなく単に時間のかかる作業になる。
+日次 20件なら 250 スレッドで 10 晩程度、ただし読みたいものは初日か2日目に出揃う。
 
 ```bash
---min-votes 10        # 一般スレッドも votes 10 以上なら対象に加える（既定は無効）
+--writeups-only       # 解法 writeup に絞る
+--min-votes 10        # --writeups-only と併用。votes 10 以上の一般スレッドも残す
 --topic 733154        # 個別に強制追加（繰り返し可）
---all-topics          # 全スレッド（高い。全部が翻訳候補になる）
---skip-writeups       # writeup を除外
+--skip-writeups       # writeup を除外（discussion のみ）
 --limit N             # この実行での jina 取得回数の上限
 --full                # キャッシュを無視して再レンダリング
 ```
+
+`--all-topics` は受理するが何もしない（全件が既定になる前の指定方法。既存の
+`ops.conf` が渡していても壊れないようにしてある）。
 
 ## 落とし穴（すべて実害があったもの）
 
